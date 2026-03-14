@@ -12,10 +12,10 @@ class GerenciadorArmazem:
     # 1. Inserir
     def inserir_produto(self, nome, quantidade_estoque, id_categoria, id_qualidade):
         try:
+            # O '?' é um placeholder para evitar SQL Injection.
             self.cursor.execute('''
                 INSERT INTO produtos (nome, quantidade_estoque, id_categoria, id_qualidade)
-                VALUES (?, ?, ?, ?) # O '?' é um placeholder para evitar SQL Injection, 
-                                    # e os valores são passados como uma tupla no segundo argumento do execute    
+                VALUES (?, ?, ?, ?)
             ''', (nome, quantidade_estoque, id_categoria, id_qualidade))
             self.conexao.commit()
             return True
@@ -75,7 +75,7 @@ class GerenciadorArmazem:
         
         if produto:
             nome, qtd, cat, qual, valor_base, multiplicador = produto
-            valor_final = valor_base * multiplicador # A mágica do Stardew Valley aqui!
+            valor_final = valor_base * multiplicador 
             return {
                 "nome": nome,
                 "estoque": qtd,
@@ -104,6 +104,6 @@ class GerenciadorArmazem:
             
         return total_elementos, valor_total_estoque
 
-        # Fechar conexão quando o gerenciador for destruído
-        def fechar_conexao(self):
-            self.conexao.close()
+# Fechar conexão quando o gerenciador for destruído
+    def fechar_conexao(self):
+        self.conexao.close()

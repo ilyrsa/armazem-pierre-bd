@@ -56,9 +56,10 @@ CREATE TABLE IF NOT EXISTS produtos (
 # O comando INSERT OR IGNORE é usado para evitar erros caso os dados já existam (por exemplo, se o script for executado mais de uma vez)
 cursor.executescript('''
     INSERT OR IGNORE INTO categorias (nome, valor_base) VALUES ('Semente', 20.0);
-    INSERT OR IGNORE INTO categorias (nome, valor_base) VALUES ('Fruta', 80.0);
-    INSERT OR IGNORE INTO categorias (nome, valor_base) VALUES ('Produto Artesanal', 300.0);
+    INSERT OR IGNORE INTO categorias (nome, valor_base) VALUES ('Cultivo (Frutas/Hortaliças)', 80.0);
+    INSERT OR IGNORE INTO categorias (nome, valor_base) VALUES ('Coleta', 50.0);
     INSERT OR IGNORE INTO categorias (nome, valor_base) VALUES ('Peixe', 100.0);
+    INSERT OR IGNORE INTO categorias (nome, valor_base) VALUES ('Produto Artesanal', 300.0);
 
     INSERT OR IGNORE INTO qualidades (nome, multiplicador) VALUES ('Normal', 1.0);
     INSERT OR IGNORE INTO qualidades (nome, multiplicador) VALUES ('Prata', 1.25);
