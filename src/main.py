@@ -1,12 +1,26 @@
 import sys
 import os
+from time import sleep
 
 # Adiciona o diretório atual ao sys.path para permitir importações locais
 sys.path.append(os.path.dirname(__file__))
 from gerenciador import GerenciadorArmazem
 
+def typewriter(text, speed=0.05):
+    for char in text:
+        sleep(speed)
+        sys.stdout.write(char)
+        sys.stdout.flush()
+    sys.stdout.write("\n")
+    sys.stdout.flush()
+    sleep(1)
+
+def exibir_introducao():
+    titulo = "\n=== 🌻 BEM-VINDO(A) AO ARMAZÉM DO PIERRE (Stardew Valley) 🌻 ===\n"
+    typewriter(titulo, speed=0.04)
+    sleep(1)
+
 def exibir_menu():
-    print("\n=== 🌻 BEM-VINDO(A) AO ARMAZÉM DO PIERRE (Stardew Valley) 🌻 ===")
     print("1. Inserir novo produto") 
     print("2. Alterar produto existente") 
     print("3. Pesquisar por nome") 
@@ -20,6 +34,8 @@ def exibir_menu():
 def main():
     # Classe gerenciadora instanciada
     gerenciador = GerenciadorArmazem()
+
+    exibir_introducao()
 
     while True:
         exibir_menu()
@@ -40,6 +56,8 @@ def main():
             else:
                 print("❌ Erro ao inserir item.")
 
+            sleep(0.5)
+
         elif opcao == '2':
             id_prod = int(input("ID do produto que deseja alterar: "))
             novo_nome = input("Novo nome: ")
@@ -48,6 +66,8 @@ def main():
                 print("✅ Produto alterado com sucesso!")
             else:
                 print("❌ Produto não encontrado.")
+
+            sleep(0.5)
 
         elif opcao == '3':
             nome_pesquisa = input("Digite o nome para pesquisar: ")
@@ -58,12 +78,16 @@ def main():
             else:
                 print("Nenhum item encontrado com esse nome.")
 
+            sleep(0.5)
+
         elif opcao == '4':
             id_prod = int(input("ID do produto a ser removido: "))
             if gerenciador.remover_produto(id_prod):
                 print("🗑️ Produto jogado no lixo com sucesso!")
             else:
                 print("❌ Produto não encontrado.")
+
+            sleep(0.5)
 
         elif opcao == '5':
             produtos = gerenciador.listar_todos()
@@ -73,6 +97,8 @@ def main():
                     print(f"ID: {p[0]} | Nome: {p[1]} | Estoque: {p[2]} un. | Tipo: {p[3]} | Qualidade: {p[4]}")
             else:
                 print("O baú está vazio!")
+
+            sleep(0.5)
 
         elif opcao == '6':
             id_prod = int(input("ID do produto para exibir detalhes: "))
@@ -84,8 +110,12 @@ def main():
                 print(f"Categoria: {produto['categoria']}")
                 print(f"Qualidade: {produto['qualidade']}")
                 print(f"💰 VALOR FINAL DE VENDA: {produto['valor_unitario']}g")
+                print()
             else:
                 print("❌ Produto não encontrado.")
+                print()
+
+            sleep(0.5)
 
         elif opcao == '7':
             total_itens, valor_caixa = gerenciador.gerar_relatorio()
@@ -93,13 +123,20 @@ def main():
             print(f"Total de itens guardados: {total_itens}")
             print(f"Valor total do estoque: {valor_caixa}g")
             print("===================================")
+            print()
+
+            sleep(0.5)
 
         elif opcao == '0':
-            print("Fechando o Armazém. Até amanhã!")
+            typewriter("\nFechando o Armazém.")
+            sleep(0.2)
+            typewriter("Até logo! ~ Pierre 🌻")
             gerenciador.fechar_conexao()
             break
         else:
             print("Opção inválida. Tente novamente.")
+
+            sleep(0.5)
 
 if __name__ == "__main__":
     main()
