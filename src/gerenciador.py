@@ -1,64 +1,63 @@
-import sqlite3
-import os
+import psycopg2
 
-# Caminho para o arquivo do banco de dados
-# A classe implementa a lógica de acesso ao banco, e é usada pelo main.py para realizar as operações solicitadas pelo usuário
 class GerenciadorArmazem:
     def __init__(self):
-        caminho_db = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'db', 'banco.db')
-        self.conexao = sqlite3.connect(caminho_db)
+        # Conecta ao servidor local
+        self.conexao = psycopg2.connect(
+            host="localhost",
+            database="stardew",
+            user="lari",
+            password="1234"
+        )
         self.cursor = self.conexao.cursor()
 
     # 1. Inserir
     def inserir_produto(self, nome, quantidade_estoque, id_categoria, id_qualidade):
         try:
-            # O '?' é um placeholder para evitar SQL Injection.
             self.cursor.execute('''
                 INSERT INTO produtos (nome, quantidade_estoque, id_categoria, id_qualidade)
-                VALUES (?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s)
             ''', (nome, quantidade_estoque, id_categoria, id_qualidade))
             self.conexao.commit()
             return True
         except Exception as e:
             print(f"Erro ao inserir: {e}")
+            self.conexao.rollback() # Postgres exige rollback se der erro
             return False
 
     # 2. Alterar
     def alterar_produto(self, id_produto, novo_nome, nova_qtd):
         self.cursor.execute('''
             UPDATE produtos
-            SET nome = ?, quantidade_estoque = ?
-            WHERE id_produto = ?
+            SET nome = %s, quantidade_estoque = %s
+            WHERE id_produto = %s
         ''', (novo_nome, nova_qtd, id_produto))
         self.conexao.commit()
-
-        # O rowcount retorna o número de linhas afetadas pela última operação. Se for maior que 0, significa que a atualização foi bem-sucedida.
         return self.cursor.rowcount > 0
 
     # 3. Pesquisar por nome
     def pesquisar_por_nome(self, nome_pesquisa):
-        # O '%' permite achar partes do nome 
         self.cursor.execute('''
-            SELECT * FROM produtos WHERE nome LIKE ?
-        ''', (f'%{nome_pesquisa}%',))
+            SELECT * FROM produtos WHERE nome ILIKE %s
+        ''', (f'%{nome_pesquisa}%',)) # ILIKE ignora maiúsculas/minúsculas no Postgres
         return self.cursor.fetchall()
 
     # 4. Remover
     def remover_produto(self, id_produto):
         self.cursor.execute('''
-            DELETE FROM produtos WHERE id_produto = ?
+            DELETE FROM produtos WHERE id_produto = %s
         ''', (id_produto,))
         self.conexao.commit()
         return self.cursor.rowcount > 0
 
     # 5. Listar todos
     def listar_todos(self):
-        # Fazemos um JOIN para pegar os nomes da categoria e qualidade, e não só os IDs numéricos [cite: 344, 356, 358]
         self.cursor.execute('''
             SELECT p.id_produto, p.nome, p.quantidade_estoque, c.nome, q.nome 
             FROM produtos p
             JOIN categorias c ON p.id_categoria = c.id_categoria
             JOIN qualidades q ON p.id_qualidade = q.id_qualidade
+            ORDER BY p.id_produto ASC
         ''')
         return self.cursor.fetchall()
 
@@ -69,7 +68,7 @@ class GerenciadorArmazem:
             FROM produtos p
             JOIN categorias c ON p.id_categoria = c.id_categoria
             JOIN qualidades q ON p.id_qualidade = q.id_qualidade
-            WHERE p.id_produto = ?
+            WHERE p.id_produto = %s
         ''', (id_produto,))
         produto = self.cursor.fetchone()
         
@@ -104,6 +103,6 @@ class GerenciadorArmazem:
             
         return total_elementos, valor_total_estoque
 
-# Fechar conexão quando o gerenciador for destruído
     def fechar_conexao(self):
+        self.cursor.close()
         self.conexao.close()

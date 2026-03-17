@@ -1,73 +1,66 @@
-import sqlite3
-import os
+import psycopg2
 
-# Arquivo .db vai ser criado dentro da pasta db
-# os.path garante que o caminho seja correto independente do sistema operacional
-caminho_db = os.path.join(os.path.dirname(__file__), 'banco.db')
+try:
+    # Conectando ao servidor do PostgreSQL
+    conexao = psycopg2.connect(
+        host="localhost",
+        database="stardew",
+        user="lari",
+        password="1234"
+    )
+    conexao.autocommit = True
+    cursor = conexao.cursor()
 
-# Criando a conexão com o banco de dados (se o arquivo não existir, ele será criado)
-conexao = sqlite3.connect(caminho_db)
-cursor = conexao.cursor()
+    # Criando as tabelas
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS categorias (
+        id_categoria SERIAL PRIMARY KEY,
+        nome VARCHAR(255) NOT NULL UNIQUE,
+        valor_base REAL NOT NULL
+    );
+    ''')
 
-# ==========================================
-# CRIAÇÃO DAS TABELAS (DDL - Data Definition Language)
-# ==========================================
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS qualidades (
+        id_qualidade SERIAL PRIMARY KEY,
+        nome VARCHAR(255) NOT NULL UNIQUE,
+        multiplicador REAL NOT NULL   
+    );
+    ''')
 
-# 1. Tabela de categorias de produtos
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS categorias (
-    id_categoria INTEGER PRIMARY KEY AUTOINCREMENT, -- Chave primária auto-incrementada
-    nome TEXT NOT NULL UNIQUE,                      -- UNIQUE para evitar categorias duplicadas
-    valor_base REAL NOT NULL                        --  REAL é o tipo do SQLite para valores decimais. NOT NULL manda preencher.
-)
-''')
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS produtos (
+        id_produto SERIAL PRIMARY KEY,
+        nome VARCHAR(255) NOT NULL,
+        quantidade_estoque INTEGER NOT NULL,
+        id_categoria INTEGER NOT NULL,
+        id_qualidade INTEGER NOT NULL,
+        FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria),
+        FOREIGN KEY (id_qualidade) REFERENCES qualidades(id_qualidade)
+    );
+    ''')
 
-# 2. Tabela de qualidades
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS qualidades (
-    id_qualidade INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT NOT NULL UNIQUE,
-    multiplicador REAL NOT NULL   
-)
-''')
+    # Inserindo dados iniciais
+    cursor.execute('''
+        INSERT INTO categorias (nome, valor_base) VALUES 
+        ('Semente', 20.0),
+        ('Cultivo (Frutas/Hortaliças)', 80.0),
+        ('Coleta', 50.0),
+        ('Peixe', 100.0),
+        ('Produto Artesanal', 300.0)
+        ON CONFLICT (nome) DO NOTHING;
 
-# 3. Tabela de produtos
-# Não possui a coluna valor_total, pois ela será calculada dinamicamente com base no valor_base da categoria e no multiplicador da qualidade    
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS produtos (
-    id_produto INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT NOT NULL,
-    quantidade_estoque INTEGER NOT NULL,
-    id_categoria INTEGER NOT NULL,
-    id_qualidade INTEGER NOT NULL,
+        INSERT INTO qualidades (nome, multiplicador) VALUES 
+        ('Normal', 1.0),
+        ('Prata', 1.25),
+        ('Ouro', 1.5),
+        ('Irídio', 2.0)
+        ON CONFLICT (nome) DO NOTHING;
+    ''')
 
-    -- RESTRIÇÕES DE INTEGRIDADE REFERENCIAL
-    -- Não é possível inserir um produto com uma categoria ou qualidade que não exista nas tabelas
-    FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria),
-    FOREIGN KEY (id_qualidade) REFERENCES qualidades(id_qualidade)
-)
-''')
+    cursor.close()
+    conexao.close()
+    print("Baú do Stardew Valley criado e populado com sucesso!")
 
-# ==========================================
-# INSERÇÃO DE DADOS INICIAIS (DML - Data Manipulation Language)
-# ==========================================
-
-# Preenchendo a tabela base de dados
-# O comando INSERT OR IGNORE é usado para evitar erros caso os dados já existam (por exemplo, se o script for executado mais de uma vez)
-cursor.executescript('''
-    INSERT OR IGNORE INTO categorias (nome, valor_base) VALUES ('Semente', 20.0);
-    INSERT OR IGNORE INTO categorias (nome, valor_base) VALUES ('Cultivo (Frutas/Hortaliças)', 80.0);
-    INSERT OR IGNORE INTO categorias (nome, valor_base) VALUES ('Coleta', 50.0);
-    INSERT OR IGNORE INTO categorias (nome, valor_base) VALUES ('Peixe', 100.0);
-    INSERT OR IGNORE INTO categorias (nome, valor_base) VALUES ('Produto Artesanal', 300.0);
-
-    INSERT OR IGNORE INTO qualidades (nome, multiplicador) VALUES ('Normal', 1.0);
-    INSERT OR IGNORE INTO qualidades (nome, multiplicador) VALUES ('Prata', 1.25);
-    INSERT OR IGNORE INTO qualidades (nome, multiplicador) VALUES ('Ouro', 1.5);
-    INSERT OR IGNORE INTO qualidades (nome, multiplicador) VALUES ('Irídio', 2.0);
-''')
-
-conexao.commit()
-conexao.close()
-
-print("Baú do Stardew Valley construído e preenchido com sucesso na pasta db/")
+except Exception as e:
+    print(f"Erro ao conectar ou criar o banco: {e}")
