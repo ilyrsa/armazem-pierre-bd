@@ -4,7 +4,7 @@
 
 Este projeto é a **Parte 1** da avaliação da disciplina de Banco de Dados I. Consiste em um sistema CRUD (Create, Read, Update, Delete) em console para gerenciar o estoque de uma "Bodega/Agricultura" inspirada no universo de Stardew Valley 
 
-**Tecnologias utilizadas:** Python 3 e SQLite3.
+**Tecnologias utilizadas:** Python 3 e PostgreSQL.
 
 ## Estrutura
 
@@ -15,7 +15,7 @@ ArmazemStardewValley/
 │   └── gerenciador.py    # Classe GerenciadorArmazem (Isola a lógica SQL e o CRUD)
 ├── db/                   # Arquivos relacionados ao banco de dados
 │   ├── setup_banco.py    # Script DDL/DML para criar tabelas e popular categorias base
-│   └── banco.db          # Arquivo do banco SQLite (Gerado localmente, ignorado no Git)
+│   └── banco.db          # Arquivo do banco PostreSQL (Gerado localmente, ignorado no Git)
 ├── docs/                 # Documentação exigida pelo projeto
 │   └── diagrama_UML.pdf  # Diagrama de Classes UML
 ├── .gitignore            # Arquivos ignorados pelo controle de versão (*.db, venv/, etc.)
