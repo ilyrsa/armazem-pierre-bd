@@ -13,14 +13,14 @@ def typewriter(text, speed=0.05):
         sys.stdout.flush()
     sys.stdout.write("\n")
     sys.stdout.flush()
-    sleep(1)
 
 def exibir_introducao():
-    titulo = "\n=== 🌻 BEM-VINDO(A) AO ARMAZÉM DO PIERRE (Stardew Valley) 🌻 ===\n"
+    titulo = "\n=== 🌻 BEM-VINDO(A) AO ARMAZÉM DO PIERRE (Stardew Valley) 🌻 ==="
     typewriter(titulo, speed=0.04)
-    sleep(1)
+    # Sem linha extra aqui para a barra de '=' grudar certinho
 
 def exibir_menu():
+    print("================================================================")
     print("1. Inserir novo produto") 
     print("2. Alterar produto existente") 
     print("3. Pesquisar por nome") 
@@ -32,7 +32,6 @@ def exibir_menu():
     print("================================================================")
 
 def main():
-    # Classe gerenciadora instanciada
     gerenciador = GerenciadorArmazem()
 
     exibir_introducao()
@@ -42,88 +41,91 @@ def main():
         opcao = input("Escolha uma opção: ")
 
         if opcao == '1':
-            nome = input("Nome do item (ex: Vinho de Carambola): ")
-            qtd = int(input("Quantidade em estoque: "))
+            nome = input("\nNome do item (ex: Vinho de Carambola): ")
+            qtd = int(input("\nQuantidade em estoque: "))
             
             print("\nCategorias: 1-Semente, 2-Cultivo, 3-Coleta, 4-Peixe, 5-Produto Artesanal")
-            id_cat = int(input("ID da Categoria: "))
+            id_cat = int(input("\nID da Categoria: "))
             
-            print("Qualidades: 1-Normal, 2-Prata, 3-Ouro, 4-Irídio")
-            id_qual = int(input("ID da Qualidade: "))
+            print("\nQualidades: 1-Normal, 2-Prata, 3-Ouro, 4-Irídio")
+            id_qual = int(input("\nID da Qualidade: "))
 
+            print() # Pula linha antes da mensagem de sucesso
             if gerenciador.inserir_produto(nome, qtd, id_cat, id_qual):
-                print("✅ Item guardado no baú com sucesso!")
+                print("✅ Item guardado no baú com sucesso!\n")
             else:
-                print("❌ Erro ao inserir item.")
+                print("❌ Erro ao inserir item.\n")
 
             sleep(0.5)
 
         elif opcao == '2':
-            id_prod = int(input("ID do produto que deseja alterar: "))
-            novo_nome = input("Novo nome: ")
-            nova_qtd = int(input("Nova quantidade: "))
+            id_prod = int(input("\nID do produto que deseja alterar: "))
+            novo_nome = input("\nNovo nome: ")
+            nova_qtd = int(input("\nNova quantidade: "))
+            
+            print()
             if gerenciador.alterar_produto(id_prod, novo_nome, nova_qtd):
-                print("✅ Produto alterado com sucesso!")
+                print("✅ Produto alterado com sucesso!\n")
             else:
-                print("❌ Produto não encontrado.")
+                print("❌ Produto não encontrado.\n")
 
             sleep(0.5)
 
         elif opcao == '3':
-            nome_pesquisa = input("Digite o nome para pesquisar: ")
+            nome_pesquisa = input("\nDigite o nome para pesquisar: ")
+            print()
             resultados = gerenciador.pesquisar_por_nome(nome_pesquisa)
             if resultados:
                 for p in resultados:
                     print(f"ID: {p[0]} | Nome: {p[1]} | Estoque: {p[2]} | Cat: {p[3]} | Qual: {p[4]}")
+                print()
             else:
-                print("Nenhum item encontrado com esse nome.")
+                print("Nenhum item encontrado com esse nome.\n")
 
             sleep(0.5)
 
         elif opcao == '4':
-            id_prod = int(input("ID do produto a ser removido: "))
+            id_prod = int(input("\nID do produto a ser removido: "))
+            print()
             if gerenciador.remover_produto(id_prod):
-                print("🗑️ Produto jogado no lixo com sucesso!")
+                print("🗑️ Produto jogado no lixo com sucesso!\n")
             else:
-                print("❌ Produto não encontrado.")
+                print("❌ Produto não encontrado.\n")
 
             sleep(0.5)
 
         elif opcao == '5':
             produtos = gerenciador.listar_todos()
             if produtos:
-                print("\n--- Inventário Completo ---")
+                print("\n--- Inventário Completo ---\n")
                 for p in produtos:
                     print(f"ID: {p[0]} | Nome: {p[1]} | Estoque: {p[2]} un. | Tipo: {p[3]} | Qualidade: {p[4]}")
+                print()
             else:
-                print("O baú está vazio!")
+                print("\nO baú está vazio!\n")
 
             sleep(0.5)
 
         elif opcao == '6':
-            id_prod = int(input("ID do produto para exibir detalhes: "))
+            id_prod = int(input("\nID do produto para exibir detalhes: "))
             produto = gerenciador.exibir_um(id_prod)
             if produto:
                 print("\n--- Detalhes do Item ---")
-                print(f"Nome: {produto['nome']}")
-                print(f"Estoque: {produto['estoque']}")
-                print(f"Categoria: {produto['categoria']}")
-                print(f"Qualidade: {produto['qualidade']}")
-                print(f"💰 VALOR FINAL DE VENDA: {produto['valor_unitario']}g")
-                print()
+                print(f"\nNome: {produto['nome']}")
+                print(f"\nEstoque: {produto['estoque']}")
+                print(f"\nCategoria: {produto['categoria']}")
+                print(f"\nQualidade: {produto['qualidade']}")
+                print(f"\n💰 VALOR FINAL DE VENDA: {produto['valor_unitario']}g\n")
             else:
-                print("❌ Produto não encontrado.")
-                print()
+                print("\n❌ Produto não encontrado.\n")
 
             sleep(0.5)
 
         elif opcao == '7':
             total_itens, valor_caixa = gerenciador.gerar_relatorio()
             print("\n📦 === RELATÓRIO DE FIM DE DIA === 📦")
-            print(f"Total de itens guardados: {total_itens}")
-            print(f"Valor total do estoque: {valor_caixa}g")
-            print("===================================")
-            print()
+            print(f"\nTotal de itens guardados: {total_itens}")
+            print(f"\nValor total do estoque: {valor_caixa}g\n")
 
             sleep(0.5)
 
@@ -134,8 +136,7 @@ def main():
             gerenciador.fechar_conexao()
             break
         else:
-            print("Opção inválida. Tente novamente.")
-
+            print("\nOpção inválida. Tente novamente.\n")
             sleep(0.5)
 
 if __name__ == "__main__":
