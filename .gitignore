@@ -1,6 +1,7 @@
 # Ignorar o banco de dados
 *.db
 db/banco.db
+*.session.sql
 
 # Ignorar o ambiente virtual 
 venv/
