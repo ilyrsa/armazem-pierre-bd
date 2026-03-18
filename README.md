@@ -29,7 +29,7 @@ Siga os passos abaixo para inicializar o banco de dados e rodar a aplicação na
 ### 1. Clone o repositório e entre na pasta principal:
 
 ```bash 
-git clone <COLOQUE_AQUI_O_LINK_DO_SEU_REPOSITORIO>
+git clone <https://github.com/ilyrsa/banco-de-dados.git>
 cd ArmazemStardewValley
 ```
 
