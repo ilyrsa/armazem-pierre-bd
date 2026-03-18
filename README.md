@@ -41,7 +41,7 @@ source venv/bin/activate
 ```
 
 ### 3. Construa o Banco de Dados (rodar só uma vez):
-O arquivo de banco de dados (banco.db) não é versionado no Git. Você precisa rodar o script de setup para criar as tabelas e inserir as categorias/qualidades originais do jogo na sua máquina local.
+É necessário rodar o script de setup para criar as tabelas e popular o banco de dados em sua máquina local.
 
 ```bash 
 python3 db/setup_banco.py
