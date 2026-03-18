@@ -4,8 +4,8 @@ try:
     # Conectando ao servidor do PostgreSQL
     conexao = psycopg2.connect(
         host="localhost",
-        database="stardew",
-        user="lari",
+        database="",
+        user="",
         password="1234"
     )
     conexao.autocommit = True

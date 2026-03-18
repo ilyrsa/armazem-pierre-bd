@@ -2,7 +2,7 @@ import sys
 import os
 from time import sleep
 
-# Adiciona o diretório atual ao sys.path para permitir importações locais
+
 sys.path.append(os.path.dirname(__file__))
 from gerenciador import GerenciadorArmazem
 
@@ -15,9 +15,9 @@ def typewriter(text, speed=0.05):
     sys.stdout.flush()
 
 def exibir_introducao():
-    titulo = "\n=== 🌻 BEM-VINDO(A) AO ARMAZÉM DO PIERRE 🌻 ==="
+    titulo = "\n=== 🌻 BEM-VINDO(A) AO ARMAZÉM DO PIERRE (Stardew Valley) 🌻 ==="
     typewriter(titulo, speed=0.04)
-    sleep(1)
+ 
 
 def exibir_menu():
     print("================================================================")
@@ -26,7 +26,7 @@ def exibir_menu():
     print("3. Pesquisar por nome") 
     print("4. Remover produto") 
     print("5. Listar todos os produtos") 
-    print("6. Exibir um produto detalhado com preço final") 
+    print("6. Exibir um produto detalhado (com preço final!)") 
     print("7. Gerar Relatório do Fim do Dia") 
     print("0. Fechar a loja (Sair)")
     print("================================================================")
@@ -50,27 +50,39 @@ def main():
             print("\nQualidades: 1-Normal, 2-Prata, 3-Ouro, 4-Irídio")
             id_qual = int(input("\nID da Qualidade: "))
 
-            print() # Pula linha antes da mensagem de sucesso
+            print() 
             if gerenciador.inserir_produto(nome, qtd, id_cat, id_qual):
                 print("Item guardado no baú com sucesso!\n")
             else:
-                print("Ops, erro ao inserir item.\n")
+                print("Erro ao inserir item.\n")
 
             sleep(0.5)
 
         elif opcao == '2':
-            id_prod = int(input("\nID do produto que deseja alterar: "))
-            novo_nome = input("\nNovo nome: ")
-            nova_qtd = int(input("\nNova quantidade: "))
-            
+            id_prod = int(input("\n ID do produto que deseja alterar: "))
+
+            print("\n O que deseja alterar?")
+            print("1. Apenas o nome")
+            print("2. Apenas a quantidade")
+            print("3. Nome e quantidade")
+            escolha = input("\nEscolha: ")
+
+            novo_nome = None
+            nova_qtd = None
+
+            if escolha == '1' or escolha == '3':
+                novo_nome = input("\n Novo nome: ")
+
+            if escolha == '2' or escolha == '3':
+                nova_qtd = int(input("\n Nova quantidade: "))
             print()
             if gerenciador.alterar_produto(id_prod, novo_nome, nova_qtd):
-                print("Item alterado com sucesso!\n")
+                print("Produto alterado com sucesso!\n")
             else:
-                print("Item não encontrado.\n")
+                print("Produto não encontrado ou nenhum campo informado.\n")
 
             sleep(0.5)
-
+        
         elif opcao == '3':
             nome_pesquisa = input("\nDigite o nome para pesquisar: ")
             print()
@@ -88,9 +100,9 @@ def main():
             id_prod = int(input("\nID do produto a ser removido: "))
             print()
             if gerenciador.remover_produto(id_prod):
-                print("O item foi jogado no lixo com sucesso!\n")
+                print("Produto jogado no lixo com sucesso!\n")
             else:
-                print("Item não encontrado.\n")
+                print("Produto não encontrado.\n")
 
             sleep(0.5)
 
@@ -115,15 +127,15 @@ def main():
                 print(f"\nEstoque: {produto['estoque']}")
                 print(f"\nCategoria: {produto['categoria']}")
                 print(f"\nQualidade: {produto['qualidade']}")
-                print(f"\nValor final de venda: {produto['valor_unitario']}g\n")
+                print(f"\nVALOR FINAL DE VENDA: {produto['valor_unitario']}g\n")
             else:
-                print("\nItem não encontrado.\n")
+                print("\nProduto não encontrado.\n")
 
             sleep(0.5)
 
         elif opcao == '7':
             total_itens, valor_caixa = gerenciador.gerar_relatorio()
-            print("\n === RELATÓRIO DE FIM DE DIA === ")
+            print("\n📦 === RELATÓRIO DE FIM DE DIA === 📦")
             print(f"\nTotal de itens guardados: {total_itens}")
             print(f"\nValor total do estoque: {valor_caixa}g\n")
 

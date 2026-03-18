@@ -5,8 +5,8 @@ class GerenciadorArmazem:
         # Conecta ao servidor local
         self.conexao = psycopg2.connect(
             host="localhost",
-            database="stardew",
-            user="lari",
+            database="",
+            user="",
             password="1234"
         )
         self.cursor = self.conexao.cursor()
@@ -26,12 +26,30 @@ class GerenciadorArmazem:
             return False
 
     # 2. Alterar
-    def alterar_produto(self, id_produto, novo_nome, nova_qtd):
-        self.cursor.execute('''
+    def alterar_produto(self, id_produto, novo_nome=None, nova_qtd=None):
+        if novo_nome is None and nova_qtd is None:
+            print("Nenhum campo informado para alterar.")
+            return False
+
+        campos = []
+        valores = []
+
+        if novo_nome is not None:
+            campos.append("nome = %s")
+            valores.append(novo_nome)
+
+        if nova_qtd is not None:
+            campos.append("quantidade_estoque = %s")
+            valores.append(nova_qtd)
+
+        valores.append(id_produto)
+
+        self.cursor.execute(f'''
             UPDATE produtos
-            SET nome = %s, quantidade_estoque = %s
+            SET {", ".join(campos)}
             WHERE id_produto = %s
-        ''', (novo_nome, nova_qtd, id_produto))
+            ''', tuple(valores))
+
         self.conexao.commit()
         return self.cursor.rowcount > 0
 
