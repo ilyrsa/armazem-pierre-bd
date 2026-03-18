@@ -5,8 +5,8 @@ class GerenciadorArmazem:
         # Conecta ao servidor local
         self.conexao = psycopg2.connect(
             host="localhost",
-            database="",
-            user="",
+            database="stardew",
+            user="lari",
             password="1234"
         )
         self.cursor = self.conexao.cursor()
@@ -112,6 +112,8 @@ class GerenciadorArmazem:
         ''')
         itens = self.cursor.fetchall()
         
+        # Conta a quantidade de linhas retornadas (tipos de produtos)
+        tipos_produtos = len(itens) 
         total_elementos = 0
         valor_total_estoque = 0.0
         
@@ -119,7 +121,8 @@ class GerenciadorArmazem:
             total_elementos += estoque
             valor_total_estoque += (estoque * (valor_base * multiplicador))
             
-        return total_elementos, valor_total_estoque
+        # Retorna as informações do relatório
+        return tipos_produtos, total_elementos, valor_total_estoque
 
     def fechar_conexao(self):
         self.cursor.close()

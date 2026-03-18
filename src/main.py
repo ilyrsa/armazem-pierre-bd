@@ -134,10 +134,11 @@ def main():
             sleep(0.5)
 
         elif opcao == '7':
-            total_itens, valor_caixa = gerenciador.gerar_relatorio()
-            print("\n📦 === RELATÓRIO DE FIM DE DIA === 📦")
-            print(f"\nTotal de itens guardados: {total_itens}")
-            print(f"\nValor total do estoque: {valor_caixa}g\n")
+            tipos_produtos, total_elementos, valor_total_estoque = gerenciador.gerar_relatorio()
+            print("\n📦 === RELATÓRIO FINAL === 📦")
+            print(f"\nTotal de tipos de itens: {tipos_produtos}")
+            print(f"\nTotal de itens guardados: {total_elementos}")
+            print(f"\nValor total do estoque: {valor_total_estoque}g\n")
 
             sleep(0.5)
 
