@@ -15,9 +15,9 @@ def typewriter(text, speed=0.05):
     sys.stdout.flush()
 
 def exibir_introducao():
-    titulo = "\n=== 🌻 BEM-VINDO(A) AO ARMAZÉM DO PIERRE (Stardew Valley) 🌻 ==="
+    titulo = "\n=== 🌻 BEM-VINDO(A) AO ARMAZÉM DO PIERRE 🌻 ==="
     typewriter(titulo, speed=0.04)
-    # Sem linha extra aqui para a barra de '=' grudar certinho
+    sleep(1)
 
 def exibir_menu():
     print("================================================================")
@@ -26,7 +26,7 @@ def exibir_menu():
     print("3. Pesquisar por nome") 
     print("4. Remover produto") 
     print("5. Listar todos os produtos") 
-    print("6. Exibir um produto detalhado (com preço final!)") 
+    print("6. Exibir um produto detalhado com preço final") 
     print("7. Gerar Relatório do Fim do Dia") 
     print("0. Fechar a loja (Sair)")
     print("================================================================")
@@ -52,9 +52,9 @@ def main():
 
             print() # Pula linha antes da mensagem de sucesso
             if gerenciador.inserir_produto(nome, qtd, id_cat, id_qual):
-                print("✅ Item guardado no baú com sucesso!\n")
+                print("Item guardado no baú com sucesso!\n")
             else:
-                print("❌ Erro ao inserir item.\n")
+                print("Ops, erro ao inserir item.\n")
 
             sleep(0.5)
 
@@ -65,9 +65,9 @@ def main():
             
             print()
             if gerenciador.alterar_produto(id_prod, novo_nome, nova_qtd):
-                print("✅ Produto alterado com sucesso!\n")
+                print("Item alterado com sucesso!\n")
             else:
-                print("❌ Produto não encontrado.\n")
+                print("Item não encontrado.\n")
 
             sleep(0.5)
 
@@ -88,9 +88,9 @@ def main():
             id_prod = int(input("\nID do produto a ser removido: "))
             print()
             if gerenciador.remover_produto(id_prod):
-                print("🗑️ Produto jogado no lixo com sucesso!\n")
+                print("O item foi jogado no lixo com sucesso!\n")
             else:
-                print("❌ Produto não encontrado.\n")
+                print("Item não encontrado.\n")
 
             sleep(0.5)
 
@@ -115,15 +115,15 @@ def main():
                 print(f"\nEstoque: {produto['estoque']}")
                 print(f"\nCategoria: {produto['categoria']}")
                 print(f"\nQualidade: {produto['qualidade']}")
-                print(f"\n💰 VALOR FINAL DE VENDA: {produto['valor_unitario']}g\n")
+                print(f"\nValor final de venda: {produto['valor_unitario']}g\n")
             else:
-                print("\n❌ Produto não encontrado.\n")
+                print("\nItem não encontrado.\n")
 
             sleep(0.5)
 
         elif opcao == '7':
             total_itens, valor_caixa = gerenciador.gerar_relatorio()
-            print("\n📦 === RELATÓRIO DE FIM DE DIA === 📦")
+            print("\n === RELATÓRIO DE FIM DE DIA === ")
             print(f"\nTotal de itens guardados: {total_itens}")
             print(f"\nValor total do estoque: {valor_caixa}g\n")
 
