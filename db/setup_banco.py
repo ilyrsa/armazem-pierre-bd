@@ -19,6 +19,8 @@ try:
     ''')
 
     # Criando as tabelas
+
+    # Entidade auxiliar para categorias
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS categorias (
         id_categoria SERIAL PRIMARY KEY,
@@ -27,6 +29,7 @@ try:
     );
     ''')
 
+    # Entidade auxiliar para qualidades
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS qualidades (
         id_qualidade SERIAL PRIMARY KEY,
@@ -35,6 +38,7 @@ try:
     );
     ''')
 
+    # Objeto principal: produtos
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS produtos (
         id_produto SERIAL PRIMARY KEY,
