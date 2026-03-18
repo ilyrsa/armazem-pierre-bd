@@ -11,6 +11,13 @@ try:
     conexao.autocommit = True
     cursor = conexao.cursor()
 
+    # Limpa o banco antes de criar um novo
+    cursor.execute('''
+    DROP TABLE IF EXISTS produtos CASCADE;
+    DROP TABLE IF EXISTS categorias CASCADE;
+    DROP TABLE IF EXISTS qualidades CASCADE;
+    ''')
+
     # Criando as tabelas
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS categorias (
@@ -58,9 +65,20 @@ try:
         ON CONFLICT (nome) DO NOTHING;
     ''')
 
+    # População inicial de produtos
+    cursor.execute('''
+        INSERT INTO produtos (nome, quantidade_estoque, id_categoria, id_qualidade) VALUES
+        ('Vinho de Carambola', 15, 5, 4),   
+        ('Semente de Chuva', 50, 1, 1),    
+        ('Melão', 20, 2, 3),                 
+        ('Amora', 35, 3, 2),                 
+        ('Peixe Lenda', 1, 4, 4),
+        ('Óleo de Trufas', 12, 5, 4);          
+    ''')
+
     cursor.close()
     conexao.close()
-    print("Baú do Stardew Valley criado e populado com sucesso!")
+    print("Baú do Stardew Valley resetado e populado com sucesso!")
 
 except Exception as e:
     print(f"Erro ao conectar ou criar o banco: {e}")
