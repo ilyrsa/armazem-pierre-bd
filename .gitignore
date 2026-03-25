@@ -1,12 +1,18 @@
 # Ignorar o banco de dados
 *.db
 db/banco.db
-*.session.sql
 
 # Ignorar o ambiente virtual 
 venv/
 env/
 
 # Ignorar arquivos de cache dp Python
-__pycache__/
+_pycache_/
 *.pyc
+
+# Ignorar arquivos de configuração do editor
+.vscode/
+.idea/
+
+# Ignorar arquivos de sistema
+.DS_Store
