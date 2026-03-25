@@ -22,7 +22,7 @@ class GerenciadorArmazem:
             return True
         except Exception as e:
             print(f"Erro ao inserir: {e}")
-            self.conexao.rollback() # Postgres exige rollback se der erro
+            self.conexao.rollback()
             return False
 
     # 2. Alterar
@@ -57,7 +57,7 @@ class GerenciadorArmazem:
     def pesquisar_por_nome(self, nome_pesquisa):
         self.cursor.execute('''
             SELECT * FROM produtos WHERE nome ILIKE %s
-        ''', (f'%{nome_pesquisa}%',)) # ILIKE ignora maiúsculas/minúsculas no Postgres
+        ''', (f'%{nome_pesquisa}%',)) 
         return self.cursor.fetchall()
 
     # 4. Remover
@@ -112,7 +112,6 @@ class GerenciadorArmazem:
         ''')
         itens = self.cursor.fetchall()
         
-        # Conta a quantidade de linhas retornadas (tipos de produtos)
         tipos_produtos = len(itens) 
         total_elementos = 0
         valor_total_estoque = 0.0
@@ -121,7 +120,6 @@ class GerenciadorArmazem:
             total_elementos += estoque
             valor_total_estoque += (estoque * (valor_base * multiplicador))
             
-        # Retorna as informações do relatório
         return tipos_produtos, total_elementos, valor_total_estoque
 
     def fechar_conexao(self):
