@@ -3,7 +3,7 @@ services:
     image: postgres:16
     container_name: postgres_fazenda
     environment:
-      - POSTGRES_USER=lari
+      - POSTGRES_USER=postgres
       - POSTGRES_DB=stardew
       - POSTGRES_PASSWORD=1234
     ports:
