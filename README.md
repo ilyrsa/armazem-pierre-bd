@@ -220,7 +220,7 @@ python src/main.py
 
 ## Desenvolvido por
 
-[**@ilyrsa**](https://github.com/ilyrsa) • [**@bruvaloes**](https://github.com/bruvaloes)
+[@ilyrsa](https://github.com/ilyrsa) · [@bruvaloes](https://github.com/bruvaloes)
 ---
 
 ## 📝 Licença
