@@ -216,12 +216,7 @@ python src/main.py
 
 > Para usar credenciais diferentes, edite `db/setup_banco.py` e `src/gerenciador.py`
 
----
-
-## Desenvolvido por
-
-[@ilyrsa](https://github.com/ilyrsa) · [@bruvaloes](https://github.com/bruvaloes)
----
+Desenvolvido por: [@ilyrsa](https://github.com/ilyrsa) · [@bruvaloes](https://github.com/bruvaloes)
 
 ## 📝 Licença
 Projeto acadêmico (2026)
