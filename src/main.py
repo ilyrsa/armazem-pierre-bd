@@ -26,7 +26,7 @@ def exibir_menu():
     print("3. Pesquisar por nome") 
     print("4. Remover produto") 
     print("5. Listar todos os produtos") 
-    print("6. Exibir um produto detalhado (com preço final!)") 
+    print("6. Exibir um produto detalhado e preço de venda") 
     print("7. Gerar Relatório do Fim do Dia") 
     print("0. Fechar a loja (Sair)")
     print("================================================================")
@@ -40,14 +40,14 @@ def main():
         # Menu principal
         print("\n=== MENU PRINCIPAL ===")
         print("1. Área do Cliente (Navegar / Comprar / Histórico)")
-        print("2. Área do Funcionário (Armazém / Relatórios)")
+        print("2. Área do Funcionário (Armazém / Relatórios / Clientes)")
         print("0. Sair")
         opcao_principal = input("Escolha: ")
 
         # Área do cliente
         if opcao_principal == '1':
             while True:
-                print("\n🛒 --- ÁREA DO CLIENTE ---")
+                print("\n --- ÁREA DO CLIENTE ---")
                 print("1. Ver Catálogo (com Filtros Opcionais)")
                 print("2. Fazer uma Compra")
                 print("3. Ver Meu Histórico de Pedidos")
@@ -56,7 +56,7 @@ def main():
 
                 # Opção 1: Catálogo
                 if op_cli == '1':
-                    print("\n📦 --- CATÁLOGO ---")
+                    print("\n --- CATÁLOGO ---")
                     print("1. Ver catálogo completo")
                     print("2. Filtrar catálogo")
                     op_cat = input("Escolha: ")
@@ -176,6 +176,7 @@ def main():
                 print("1. Gerenciar Produtos")
                 print("2. Alerta de Estoque Baixo (< 5 unidades)")
                 print("3. Relatório Mensal de Vendas por Vendedor")
+                print("4. Ver Clientes Cadastrados")
                 print("0. Voltar")
                 op_func = input("Escolha: ")
 
@@ -325,6 +326,22 @@ def main():
                     except ValueError:
                         print("  Mês ou ano inválido.")
 
+                # Opção 4: Ver clientes cadastrados
+                elif op_func == '4':
+                    clientes = db.listar_clientes()
+                    print("\n 👥 --- CLIENTES CADASTRADOS ---")
+                    if clientes:
+                        for c in clientes:
+                            tags = []
+                            if c[2]: tags.append("Flamenguista")
+                            if c[3]: tags.append("Fã de One Piece")
+                            if c[4]: tags.append("De Sousa-PB")
+                            
+                            tags_str = f" | Tags: {', '.join(tags)}" if tags else ""
+                            print(f"  [{c[0]}] {c[1]}{tags_str}")
+                    else:
+                        print("  Nenhum cliente cadastrado ainda.")
+
                 elif op_func == '0':
                     break
 
@@ -339,4 +356,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-#a

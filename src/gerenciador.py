@@ -261,6 +261,15 @@ class GerenciadorArmazem:
             ORDER BY total_arrecadado DESC
         ''', (mes, ano))
         return self.cursor.fetchall()
+    
+    # 15. Listar os clientes que tem
+    def listar_clientes(self):
+        self.cursor.execute('''
+            SELECT id_cliente, nome, torce_flamengo, assiste_one_piece, de_sousa_pb
+            FROM clientes
+            ORDER BY id_cliente ASC
+        ''')
+        return self.cursor.fetchall()
 
     def fechar_conexao(self):
         self.cursor.close()
