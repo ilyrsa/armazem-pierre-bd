@@ -2,6 +2,7 @@ services:
   db:
     image: postgres:latest
     container_name: postgres_fazenda
+    network_mode: "host"
     environment:
       - POSTGRES_USER=brunavaloes
       - POSTGRES_DB=stardew
@@ -13,3 +14,5 @@ services:
 
 volumes:
   stardew_data:
+
+

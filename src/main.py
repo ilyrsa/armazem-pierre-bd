@@ -32,121 +32,300 @@ def exibir_menu():
     print("================================================================")
 
 def main():
-    gerenciador = GerenciadorArmazem()
+    db = GerenciadorArmazem()
 
     exibir_introducao()
 
     while True:
-        exibir_menu()
-        opcao = input("Escolha uma opção: ")
+        # Menu principal
+        print("\n=== MENU PRINCIPAL ===")
+        print("1. Área do Cliente (Navegar / Comprar / Histórico)")
+        print("2. Área do Funcionário (Armazém / Relatórios)")
+        print("0. Sair")
+        opcao_principal = input("Escolha: ")
 
-        if opcao == '1':
-            nome = input("\nNome do item (ex: Vinho de Carambola): ")
-            qtd = int(input("\nQuantidade em estoque: "))
-            
-            print("\nCategorias: 1-Semente, 2-Cultivo, 3-Coleta, 4-Peixe, 5-Produto Artesanal")
-            id_cat = int(input("\nID da Categoria: "))
-            
-            print("\nQualidades: 1-Normal, 2-Prata, 3-Ouro, 4-Irídio")
-            id_qual = int(input("\nID da Qualidade: "))
+        # Área do cliente
+        if opcao_principal == '1':
+            while True:
+                print("\n🛒 --- ÁREA DO CLIENTE ---")
+                print("1. Ver Catálogo (com Filtros Opcionais)")
+                print("2. Fazer uma Compra")
+                print("3. Ver Meu Histórico de Pedidos")
+                print("0. Voltar")
+                op_cli = input("Escolha: ")
 
-            print() 
-            if gerenciador.inserir_produto(nome, qtd, id_cat, id_qual):
-                print("Item guardado no baú com sucesso!\n")
-            else:
-                print("Erro ao inserir item.\n")
+                # Opção 1: Catálogo
+                if op_cli == '1':
+                    print("\n📦 --- CATÁLOGO ---")
+                    print("1. Ver catálogo completo")
+                    print("2. Filtrar catálogo")
+                    op_cat = input("Escolha: ")
 
-            sleep(0.5)
+                    # Valor padrão eh sem filtro
+                    nome = p_min = p_max = cat = mari = None
 
-        elif opcao == '2':
-            id_prod = int(input("\n ID do produto que deseja alterar: "))
+                    if op_cat == '2':
+                        # Filtros opcionais
+                        print("\n[Deixe em branco para não filtrar]")
+                        nome  = input("Nome contém: ") or None
+                        p_min_str = input("Preço mínimo (G): ")
+                        p_max_str = input("Preço máximo (G): ")
+                        cat   = input("Categoria (Semente/Cultivo/Coleta/Peixe): ") or None
+                        mari_str  = input("Apenas fabricados em Mari-PB (S/N)? ").upper()
 
-            print("\n O que deseja alterar?")
-            print("1. Apenas o nome")
-            print("2. Apenas a quantidade")
-            print("3. Nome e quantidade")
-            escolha = input("\nEscolha: ")
+                        p_min = float(p_min_str) if p_min_str else None
+                        p_max = float(p_max_str) if p_max_str else None
+                        mari  = True if mari_str == 'S' else (False if mari_str == 'N' else None)
+                    elif op_cat != '1':
+                        print("Opção inválida.")
+                        continue
 
-            novo_nome = None
-            nova_qtd = None
+                    produtos = db.listar_catalogo_filtrado(nome, p_min, p_max, cat, mari)
+                    print("\n--- CATÁLOGO DO ARMAZÉM ---")
+                    if produtos:
+                        # Colunas: id, nome, preço, categoria, estoque, mari
+                        for p in produtos:
+                            tag_mari = " Mari-PB" if p[5] else ""
+                            print(f"  [{p[0]}] {p[1]:<25} | {p[3]:<8} | {p[2]:>6.1f} G | Estoque: {p[4]} {tag_mari}")
+                    else:
+                        print("  Nenhum produto encontrado com esses filtros.")
 
-            if escolha == '1' or escolha == '3':
-                novo_nome = input("\n Novo nome: ")
+                # Opção 2: Compra
+                # Pede os dados do cliente (cadastro)
+                elif op_cli == '2':
+                    print("\n📝 --- CADASTRO PARA COMPRA ---")
+                    print("Informe seus dados (usados para aplicar descontos especiais):")
+                    nome_cli = input("Seu nome: ")
+                    fla      = input("Torce pro Flamengo (S/N)? ").upper() == 'S'
+                    op       = input("Assiste One Piece (S/N)?   ").upper() == 'S'
+                    sousa    = input("É de Sousa-PB (S/N)?       ").upper() == 'S'
 
-            if escolha == '2' or escolha == '3':
-                nova_qtd = int(input("\n Nova quantidade: "))
-            print()
-            if gerenciador.alterar_produto(id_prod, novo_nome, nova_qtd):
-                print("Produto alterado com sucesso!\n")
-            else:
-                print("Produto não encontrado ou nenhum campo informado.\n")
+                    # Registra o cliente e calcula o desconto (10% por critério)
+                    id_cli = db.registrar_cliente(nome_cli, fla, op, sousa)
+                    desconto_possivel = (fla + op + sousa) * 10
+                    print(f"\nBem-vindo(a), {nome_cli}! Desconto potencial: {desconto_possivel}%.")
+                    if desconto_possivel > 0:
+                        print("  (Aplicado ao finalizar a compra)")
 
-            sleep(0.5)
-        
-        elif opcao == '3':
-            nome_pesquisa = input("\nDigite o nome para pesquisar: ")
-            print()
-            resultados = gerenciador.pesquisar_por_nome(nome_pesquisa)
-            if resultados:
-                for p in resultados:
-                    print(f"ID: {p[0]} | Nome: {p[1]} | Estoque: {p[2]} | Cat: {p[3]} | Qual: {p[4]}")
-                print()
-            else:
-                print("Nenhum item encontrado com esse nome.\n")
+                    # Indica o funcionário que vai realizar a venda
+                    print("\nEscolha quem vai te atender:")
+                    for v in db.listar_opcoes('vendedores'):
+                        print(f"  [{v[0]}] {v[1]}")
+                    id_vend = int(input("ID do Vendedor: "))
 
-            sleep(0.5)
+                    # Montagem do carrinho
+                    print("\nAdicione produtos ao carrinho (ID 0 para finalizar):")
+                    carrinho = []
+                    while True:
+                        id_prod = int(input("  ID do Produto (ou 0 para fechar carrinho): "))
+                        if id_prod == 0:
+                            break
+                        qtd = int(input("  Quantidade: "))
+                        carrinho.append({'id_prod': id_prod, 'qtd': qtd})
 
-        elif opcao == '4':
-            id_prod = int(input("\nID do produto a ser removido: "))
-            print()
-            if gerenciador.remover_produto(id_prod):
-                print("Produto jogado no lixo com sucesso!\n")
-            else:
-                print("Produto não encontrado.\n")
+                    if not carrinho:
+                        print("Carrinho vazio. Compra cancelada.")
+                        continue
 
-            sleep(0.5)
+                    # Escolhe a forma de pagamento
+                    print("\nComo deseja pagar?")
+                    for fp in db.listar_opcoes('formas_pagamento'):
+                        print(f"  [{fp[0]}] {fp[1]}")
+                    id_pagamento = int(input("ID da Forma de Pagamento: "))
 
-        elif opcao == '5':
-            produtos = gerenciador.listar_todos()
-            if produtos:
-                print("\n--- Inventário Completo ---\n")
-                for p in produtos:
-                    print(f"ID: {p[0]} | Nome: {p[1]} | Estoque: {p[2]} un. | Tipo: {p[3]} | Qualidade: {p[4]}")
-                print()
-            else:
-                print("\nO baú está vazio!\n")
+                    # Processa a venda todinha
+                    sucesso, retorno = db.processar_venda_completa(id_cli, id_vend, id_pagamento, carrinho)
 
-            sleep(0.5)
+                    if sucesso:
+                        print("\n  COMPRA REALIZADA COM SUCESSO!")
+                        print(f"  Valor Bruto:          {retorno[0]:.1f} G")
+                        print(f"  Desconto Aplicado:   -{retorno[1]:.1f} G")
+                        print(f"  ─────────────────────────────")
+                        print(f"  VALOR FINAL PAGO:     {retorno[2]:.1f} G")
+                        print(f"\n  (Guarde seu ID de cliente [{id_cli}] para consultar o histórico!)")
+                    else:
+                        print(f"\n  ERRO NA COMPRA: {retorno}")
 
-        elif opcao == '6':
-            id_prod = int(input("\nID do produto para exibir detalhes: "))
-            produto = gerenciador.exibir_um(id_prod)
-            if produto:
-                print("\n--- Detalhes do Item ---")
-                print(f"\nNome: {produto['nome']}")
-                print(f"\nEstoque: {produto['estoque']}")
-                print(f"\nCategoria: {produto['categoria']}")
-                print(f"\nQualidade: {produto['qualidade']}")
-                print(f"\nVALOR FINAL DE VENDA: {produto['valor_unitario']}g\n")
-            else:
-                print("\nProduto não encontrado.\n")
+                # Opção 3: Histórico de Pedidos
+                elif op_cli == '3':
+                    print("\n📋 --- HISTÓRICO DE PEDIDOS ---")
+                    try:
+                        id_cli = int(input("Informe seu ID de cliente: "))
+                        pedidos = db.historico_pedidos_cliente(id_cli)
 
-            sleep(0.5)
+                        if pedidos:
+                            print(f"\nPedidos do cliente #{id_cli}:\n")
+                            for p in pedidos:
+                                # p = (id_venda, data_venda, forma_pag, status, bruto, desconto, liquido)
+                                print(f"  Venda #{p[0]} | {p[1].strftime('%d/%m/%Y %H:%M')}")
+                                print(f"    Pagamento: {p[2]} ({p[3]})")
+                                print(f"    Bruto: {p[4]:.1f} G | Desconto: -{p[5]:.1f} G | Final: {p[6]:.1f} G")
+                                print()
+                        else:
+                            print("  Nenhuma compra encontrada para este ID.")
+                    except ValueError:
+                        print("  ID inválido.")
 
-        elif opcao == '7':
-            tipos_produtos, total_elementos, valor_total_estoque = gerenciador.gerar_relatorio()
-            print("\n📦 === RELATÓRIO FINAL === 📦")
-            print(f"\nTotal de tipos de itens: {tipos_produtos}")
-            print(f"\nTotal de itens guardados: {total_elementos}")
-            print(f"\nValor total do estoque: {valor_total_estoque}g\n")
+                elif op_cli == '0':
+                    break
 
-            sleep(0.5)
+        # Área do funcionário
+        elif opcao_principal == '2':
+            while True:
+                print("\n --- ÁREA DO FUNCIONÁRIO ---")
+                print("1. Gerenciar Produtos")
+                print("2. Alerta de Estoque Baixo (< 5 unidades)")
+                print("3. Relatório Mensal de Vendas por Vendedor")
+                print("0. Voltar")
+                op_func = input("Escolha: ")
 
-        elif opcao == '0':
-            typewriter("\nFechando o Armazém.")
-            sleep(0.2)
-            typewriter("Até logo! ~ Pierre 🌻")
-            gerenciador.fechar_conexao()
+                # Opção 1: Gerenciamento de produtos (CRUD)
+                if op_func == '1':
+                    while True:
+                        print("\n --- GERENCIAR PRODUTOS ---")
+                        print("1. Listar todos")
+                        print("2. Exibir um produto")
+                        print("3. Pesquisar por nome")
+                        print("4. Inserir produto")
+                        print("5. Alterar produto")
+                        print("6. Remover produto")
+                        print("7. Relatório geral do estoque")
+                        print("0. Voltar")
+                        op_crud = input("Escolha: ")
+
+                        # Listar todos os produtos
+                        if op_crud == '1':
+                            produtos = db.listar_todos()
+                            print("\n--- TODOS OS PRODUTOS ---")
+                            for p in produtos:
+                                # p = (id, nome, estoque, categoria, qualidade)
+                                print(f"  [{p[0]}] {p[1]:<25} | {p[3]:<8} | {p[4]:<6} | Estoque: {p[2]}")
+
+                        # Exibir detalhes de um produto pelo id
+                        elif op_crud == '2':
+                            try:
+                                id_p = int(input("ID do produto: "))
+                                p = db.exibir_um(id_p)
+                                if p:
+                                    print(f"\n  Nome:      {p['nome']}")
+                                    print(f"  Categoria: {p['categoria']}")
+                                    print(f"  Qualidade: {p['qualidade']}")
+                                    print(f"  Estoque:   {p['estoque']} un.")
+                                    print(f"  Preço:     {p['valor_unitario']:.1f} G")
+                                else:
+                                    print("  Produto não encontrado.")
+                            except ValueError:
+                                print("  ID inválido.")
+
+                        # Pesquisar por nome
+                        elif op_crud == '3':
+                            nome_p = input("Nome contém: ")
+                            resultados = db.pesquisar_por_nome(nome_p)
+                            if resultados:
+                                for p in resultados:
+                                    print(f"  [{p[0]}] {p[1]} — Estoque: {p[2]}")
+                            else:
+                                print("  Nenhum produto encontrado.")
+
+                        # Inserir novo produto
+                        elif op_crud == '4':
+                            try:
+                                nome_p  = input("Nome do produto: ")
+                                qtd     = int(input("Quantidade em estoque: "))
+
+                                # Mostra categorias disponíveis para o funcionário escolher
+                                print("Categorias disponíveis:")
+                                for c in db.listar_opcoes('categorias'):
+                                    print(f"  [{c[0]}] {c[1]} (base: {c[2]} G)")
+                                id_cat  = int(input("ID da Categoria: "))
+
+                                # Mostra qualidades disponíveis
+                                print("Qualidades disponíveis:")
+                                for q in db.listar_opcoes('qualidades'):
+                                    print(f"  [{q[0]}] {q[1]} (x{q[2]})")
+                                id_qual = int(input("ID da Qualidade: "))
+
+                                mari_s  = input("Fabricado em Mari-PB (S/N)? ").upper() == 'S'
+
+                                if db.inserir_produto(nome_p, qtd, id_cat, id_qual, mari_s):
+                                    print("  Produto inserido com sucesso!")
+                                else:
+                                    print("  Falha ao inserir produto.")
+                            except ValueError:
+                                print("  Entrada inválida.")
+
+                        # Alterar nome e/ou estoque de um produto
+                        elif op_crud == '5':
+                            try:
+                                id_p     = int(input("ID do produto a alterar: "))
+                                novo_nome = input("Novo nome (Enter para manter): ") or None
+                                nova_qtd_s = input("Nova quantidade (Enter para manter): ")
+                                nova_qtd  = int(nova_qtd_s) if nova_qtd_s else None
+
+                                if db.alterar_produto(id_p, novo_nome, nova_qtd):
+                                    print("  Produto atualizado!")
+                                else:
+                                    print("  Produto não encontrado ou nada alterado.")
+                            except ValueError:
+                                print("  Entrada inválida.")
+
+                        # Remover produto pelo id
+                        elif op_crud == '6':
+                            try:
+                                id_p = int(input("ID do produto a remover: "))
+                                confirma = input(f"Tem certeza que quer remover o produto {id_p}? (S/N): ").upper()
+                                if confirma == 'S':
+                                    if db.remover_produto(id_p):
+                                        print("  Produto removido.")
+                                    else:
+                                        print("  Produto não encontrado.")
+                                else:
+                                    print("  Remoção cancelada.")
+                            except ValueError:
+                                print("  ID inválido.")
+
+                        # Relatório geral de estoque
+                        elif op_crud == '7':
+                            tipos, total, valor = db.gerar_relatorio()
+                            print(f"\n  Tipos de produto: {tipos}")
+                            print(f"  Total de itens:   {total} unidades")
+                            print(f"  Valor do estoque: {valor:.1f} G")
+
+                        elif op_crud == '0':
+                            break
+
+                # Opção 2: Estoque baixo
+                elif op_func == '2':
+                    baixo_estoque = db.filtrar_estoque_baixo()
+                    print("\n  ALERTA DE ESTOQUE BAIXO (< 5 unidades):")
+                    if baixo_estoque:
+                        for p in baixo_estoque:
+                            print(f"  ID {p[0]} — {p[1]} (Restam {p[2]} un.)")
+                    else:
+                        print("  Tudo abastecido! Nenhum produto crítico.")
+
+                # Opção 3: Relatório mensal
+                elif op_func == '3':
+                    try:
+                        mes = int(input("\nMês (1-12): "))
+                        ano = int(input("Ano (ex: 2026): "))
+                        relatorio = db.relatorio_vendas_mensal(mes, ano)
+                        print(f"\n RELATÓRIO DE VENDAS — {mes:02d}/{ano}:\n")
+                        if relatorio:
+                            for r in relatorio:
+                                # r = (vendedor, total_vendas, total_arrecadado)
+                                print(f"  {r[0]:<15} | {r[1]} venda(s) | {r[2]:.1f} G arrecadados")
+                        else:
+                            print("  Nenhuma venda confirmada neste período.")
+                    except ValueError:
+                        print("  Mês ou ano inválido.")
+
+                elif op_func == '0':
+                    break
+
+        elif opcao_principal == '0':
+            db.fechar_conexao()
+            print("\nFechando a loja. Até amanhã! 🌻")
             break
         else:
             print("\nOpção inválida. Tente novamente.\n")
@@ -154,3 +333,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+#a

@@ -1,18 +1,23 @@
-# Ignorar o banco de dados
+# Ignorar banco de dados local
 *.db
 db/banco.db
 
-# Ignorar o ambiente virtual 
+# Ignorar ambientes virtuais Python (qualquer variação de nome)
 venv/
+.venv/
 env/
+.env/
 
-# Ignorar arquivos de cache dp Python
-_pycache_/
+# Ignorar cache do Python (o typo original era _pycache_ em vez de __pycache__)
+__pycache__/
 *.pyc
+*.pyo
+*.pyd
 
-# Ignorar arquivos de configuração do editor
+# Ignorar arquivos de configuração de editor
 .vscode/
 .idea/
 
-# Ignorar arquivos de sistema
+# Ignorar arquivos de sistema operacional
 .DS_Store
+Thumbs.db
