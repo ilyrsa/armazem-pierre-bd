@@ -32,7 +32,7 @@ banco-de-dados/
 
 ---
 
-## 🚀 Setup Completo
+## Setup Completo
 
 ### Pré-requisitos
 - **Python 3.7+**
@@ -178,11 +178,11 @@ python src/main.py
 
 | Forma | Descrição |
 |-------|-----------|
-| 💛 **Ouros (G)** | Moeda universal de Pelicano |
-| 🎰 **Fichas do Cassino Qi** | Moeda do salão do Sr. Qi |
-| 🌾 **Escambo de Recursos** | Troca direta por itens da fazenda |
-| 🫐 **Bagas da Floresta** | Coleta sazonal vira moeda |
-| 💎 **Cristais de Iridium** | Mineral raro — crédito premium |
+| **Ouros (G)** | Moeda universal de Pelicano |
+| **Fichas do Cassino Qi** | Moeda do salão do Sr. Qi |
+| **Escambo de Recursos** | Troca direta por itens da fazenda |
+| **Bagas da Floresta** | Coleta sazonal vira moeda |
+| **Cristais de Iridium** | Mineral raro — crédito premium |
 
 ---
 
@@ -214,13 +214,13 @@ python src/main.py
 - **Password:** 1234
 - **Port:** 5432
 
-> ⚠️ Para usar credenciais diferentes, edite `db/setup_banco.py` e `src/gerenciador.py`
+> Para usar credenciais diferentes, edite `db/setup_banco.py` e `src/gerenciador.py`
 
 ---
 
-## 👨‍💻 Desenvolvido por
-**Lari e Bruna**
+## Desenvolvido por
 
+[**@ilyrsa**](https://github.com/ilyrsa) • [**@bruvaloes**](https://github.com/bruvaloes)
 ---
 
 ## 📝 Licença
