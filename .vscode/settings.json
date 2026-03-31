@@ -5,11 +5,21 @@
             "previewLimit": 50,
             "server": "localhost",
             "port": 5432,
-            "askForPassword": true,
             "driver": "PostgreSQL",
             "name": "Fazenda Stardew",
             "database": "stardew",
-            "username": "lari"
+            "username": "postgres",
+            "askForPassword": true
         }
-    ]
+    ],
+    "files.exclude": {
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/venv": true
+    },
+    "explorer.compactFolders": true,
+    "python.terminal.activateEnvInSelectedTerminal": true,
+    "editor.minimap.enabled": false
 }
