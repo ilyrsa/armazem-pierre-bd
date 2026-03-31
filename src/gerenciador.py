@@ -105,7 +105,7 @@ class GerenciadorArmazem:
     # 7. Relatório geral do estoque
     def gerar_relatorio(self):
         self.cursor.execute('''
-            SELECT p.quantidade_estoque, c.valor_base, q.multiplicador
+            SELECT p.quantidade_estoque, c.valor_base, q.multiplicador, c.nome
             FROM produtos p
             JOIN categorias c ON p.id_categoria = c.id_categoria
             JOIN qualidades q ON p.id_qualidade = q.id_qualidade
@@ -115,12 +115,18 @@ class GerenciadorArmazem:
         tipos_produtos = len(itens)
         total_elementos = 0
         valor_total_estoque = 0.0
+        qtd_por_categoria = {}
 
-        for estoque, valor_base, multiplicador in itens:
+        for estoque, valor_base, multiplicador, categoria in itens:
             total_elementos += estoque
             valor_total_estoque += (estoque * (valor_base * multiplicador))
 
-        return tipos_produtos, total_elementos, valor_total_estoque
+            if categoria in qtd_por_categoria:
+                qtd_por_categoria[categoria] += estoque
+            else:
+                qtd_por_categoria[categoria] = estoque
+
+        return tipos_produtos, total_elementos, valor_total_estoque, qtd_por_categoria
 
     # 8. Listar catálogo com filtros dinâmicos opcionais
     def listar_catalogo_filtrado(self, nome=None, preco_min=None, preco_max=None, categoria=None, mari=None):
@@ -157,7 +163,7 @@ class GerenciadorArmazem:
             SELECT id_produto, nome, preco_venda, categoria, quantidade_estoque, fabricado_em_mari
             FROM vw_produtos_detalhados
             {where}
-            ORDER BY nome ASC
+            ORDER BY id_produto ASC
         ''', tuple(valores))
         return self.cursor.fetchall()
 

@@ -286,10 +286,15 @@ def main():
 
                         # Relatório geral de estoque
                         elif op_crud == '7':
-                            tipos, total, valor = db.gerar_relatorio()
+                            tipos, total, valor, categorias = db.gerar_relatorio()
+                            
                             print(f"\n  Tipos de produto: {tipos}")
                             print(f"  Total de itens:   {total} unidades")
                             print(f"  Valor do estoque: {valor:.1f} G")
+                            
+                            print(f"\n  --- Quantidade por Categoria ---")
+                            for cat, qtd in categorias.items():
+                                print(f"    {cat}: {qtd} un.")
 
                         elif op_crud == '0':
                             break
