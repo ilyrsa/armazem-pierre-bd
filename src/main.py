@@ -1,10 +1,16 @@
 import sys
 import os
 from time import sleep
+import readchar
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Prompt
+from rich.layout import Layout
+from rich.live import Live
+from rich.align import Align
+from rich.text import Text
+from rich import box
 
 # Ajuste de caminho
 sys.path.append(os.path.dirname(__file__))
@@ -14,6 +20,35 @@ from interface import InterfaceStardew
 # Instâncias globais
 console = Console()
 interface = InterfaceStardew()
+
+ARTE_DIREITA = """
+╔══════════════════════════════════════╗
+║                                      ║
+║             ██████████               ║
+║           ██████████████             ║
+║          ████████████████            ║
+║          ████░░░░░░░░█████           ║
+║          ███░░░░░░░░░░░███           ║
+║           ██░███░░░███░██            ║
+║           ██░███░░░███░██            ║
+║           ██░░░░░░░░░░░██            ║
+║            █░░░░███░░░░█             ║
+║             █░░░░░░░░░█              ║
+║              █████████               ║
+║                █████                 ║
+║           ███████████████            ║
+║        █████████████████████         ║
+║      █████████████████████████       ║
+║                                      ║
+╚══════════════════════════════════════╝
+"""
+
+TITULO_ESQUERDA = """
+   ╦ ╦ ╦ ╦═╗ ╦ ╦  ╔═╗
+   ║ ║ ║ ╠╦╝ ╚╦╝  ╚═╗
+   ╩ ╚═╝ ╩╚═  ╩   ╚═╝
+ . iury s good store .
+"""
 
 def typewriter(text, speed=0.04):
     with console.capture() as capture:
@@ -26,54 +61,133 @@ def typewriter(text, speed=0.04):
         sys.stdout.flush()
     print()
 
+def gerar_layout() -> Layout:
+    """Cria a estrutura da tela dividida (Menu Esquerda, Arte Direita)."""
+    layout = Layout()
+    layout.split_row(
+        Layout(name="esquerda", ratio=2), # Menu e título ganham mais espaço
+        Layout(name="direita", ratio=1)   # Arte ganha menos
+    )
+    layout["esquerda"].split_column(
+        Layout(name="titulo", ratio=1),
+        Layout(name="menu", ratio=3)
+    )
+    return layout
+
+def atualizar_tela(layout: Layout, opcoes: list, indice_selecionado: int, titulo_menu: str):
+    """Atualiza o conteúdo dos painéis com o tema Stardew Valley (Modo Iury)."""
+    
+    estilo_caixa = "on #f4b75e"
+    
+    cor_borda = "#561703"
+
+    texto_arte = Text(ARTE_DIREITA, style="bold #680024")
+    painel_arte = Panel(
+        Align.center(texto_arte, vertical="middle"), 
+        border_style=cor_borda, box=box.HEAVY, 
+        title=f"[bold {cor_borda}]* Cliente VIP *[/]",
+        style=estilo_caixa 
+    )
+    
+    texto_titulo = Text(TITULO_ESQUERDA, style="bold #680024")
+    painel_titulo = Panel(
+        Align.center(texto_titulo, vertical="middle"),
+        border_style=cor_borda, box=box.HEAVY, 
+        title=f"[bold {cor_borda}]* ARMAZÉM DO IURY *[/]",
+        style=estilo_caixa
+    )
+    
+    texto_menu = Text()
+    
+    texto_menu.append(f"\n  {titulo_menu} \n\n", style="bold #561703") 
+    
+    for i, opcao in enumerate(opcoes):
+        if i == indice_selecionado:
+            texto_menu.append(f"  ► {opcao}\n", style="bold #571605")
+        else:
+            texto_menu.append(f"    {opcao}\n", style="bold #561703") 
+            
+    texto_menu.append("\n\nUse ↑ ↓ pra navegar e Enter pra selecionar", style="dim #561703")
+    
+    painel_menu = Panel(
+        texto_menu, 
+        border_style=cor_borda, box=box.HEAVY, 
+        title=f"[bold {cor_borda}]* Menu *[/]",
+        style=estilo_caixa
+    )
+
+    layout["direita"].update(painel_arte)
+    layout["titulo"].update(painel_titulo)
+    layout["menu"].update(painel_menu)
+
+def menu_interativo(opcoes: list, titulo: str) -> int:
+    """Roda o menu interativo e retorna o índice escolhido."""
+    layout = gerar_layout()
+    indice = 0
+    with Live(layout, console=console, screen=True, refresh_per_second=15):
+        while True:
+            atualizar_tela(layout, opcoes, indice, titulo)
+            tecla = readchar.readkey()
+            if tecla == readchar.key.UP:
+                indice = (indice - 1) % len(opcoes)
+            elif tecla == readchar.key.DOWN:
+                indice = (indice + 1) % len(opcoes)
+            elif tecla == readchar.key.ENTER:
+                return indice
+            
 def exibir_introducao():
     os.system('cls' if os.name == 'nt' else 'clear')
     titulo = Panel.fit(
-        "[bold gold1]🌻 BEM-VINDO(A) AO ARMAZÉM DO PIERRE 🌻[/]\n[italic]Stardew Valley Edition[/]",
+        "[bold gold1]🌻 BEM-VINDO(A) AO ARMAZÉM DO IURY 🌻[/]\n[italic]Stardew Valley Edition[/]",
         border_style="#8B4513",
         padding=(1, 2)
     )
     console.print(titulo)
     typewriter("   [italic dark_orange]Preparando o estoque e limpando o balcão...[/]", 0.02)
 
+def limpar_tela():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 def main():
     try:
         db = GerenciadorArmazem()
     except Exception:
-        console.print("[bold red] Erro ao conectar ao banco. O Docker está rodando?[/]")
+        console.print("[bold red]❌ Erro ao conectar ao banco. O Docker está rodando?[/]")
         return
 
-    exibir_introducao()
-
+    # Loop Principal Interativo
     while True:
-        console.print(Panel("[bold]MENU PRINCIPAL[/]\n\n1.  [cyan]Área do Cliente[/]\n2.  [orange1]Área do Funcionário[/]\n0.  [red]Sair[/]", border_style="#8B4513"))
-        
-        opcao_principal = Prompt.ask("Escolha uma opção", choices=["1", "2", "0"])
+        opcoes_main = ["Área do Cliente", "Área do Funcionário", "Sair"]
+        escolha_main = menu_interativo(opcoes_main, "MENU PRINCIPAL")
 
-        # É do cliente aqui ó
-        if opcao_principal == '1':
+        if escolha_main == 2: # SAIR
+            limpar_tela()
+            db.fechar_conexao()
+            console.print("\n[bold #8B4513]Fechando a loja. Até amanhã, Iury! 🌻[/]\n")
+            break
+
+        elif escolha_main == 0:
             while True:
-                console.print("\n[bold cyan]─── ÁREA DO CLIENTE ───[/]")
-                print("1. Ver Catálogo\n2. Fazer uma Compra\n3. Meu Histórico\n0. Voltar")
-                op_cli = Prompt.ask("Escolha", choices=["1", "2", "3", "0"])
+                opcoes_cli = ["Ver Catálogo", "Fazer uma Compra", "Meu Histórico", "Voltar"]
+                escolha_cli = menu_interativo(opcoes_cli, "ÁREA DO CLIENTE")
 
-                if op_cli == '1':
+                if escolha_cli == 3: # Voltar
+                    break
+
+                limpar_tela()
+
+                if escolha_cli == 0:
                     op_cat = Prompt.ask("\n[1] Catálogo Completo\n[2] Filtrar Catálogo", choices=["1", "2"])
-                    
                     nome = p_min = p_max = cat = mari = None
                     
                     if op_cat == '2': 
                         console.print("[italic]Deixe em branco para não filtrar um campo.[/]")
                         nome = Prompt.ask("Nome contém") or None
-                        
                         p_min_str = Prompt.ask("Preço mínimo (G)")
                         p_min = float(p_min_str) if p_min_str else None
-                        
                         p_max_str = Prompt.ask("Preço máximo (G)")
                         p_max = float(p_max_str) if p_max_str else None
-                        
                         cat = Prompt.ask("Categoria (Semente/Cultivo/etc)") or None
-                        
                         mari_str = Prompt.ask("Apenas fabricados em Mari-PB? (S/N)", choices=["S", "N", ""])
                         mari = True if mari_str == 'S' else (False if mari_str == 'N' else None)
 
@@ -83,8 +197,8 @@ def main():
                     else:
                         console.print("\n[yellow]  Nenhum produto encontrado com esses filtros.[/]")
 
-                elif op_cli == '2':
-                    console.print(Panel("[bold] IDENTIFICAÇÃO / CADASTRO[/]", border_style="cyan"))
+                elif escolha_cli == 1:
+                    console.print(Panel("[bold]📝 IDENTIFICAÇÃO / CADASTRO[/]", border_style="cyan"))
                     console.print("[italic]Informe seus dados para aplicar descontos especiais:[/]")
                     nome_cli = Prompt.ask("Seu nome")
                     fla = Prompt.ask("Torce pro Flamengo? (S/N)", choices=["S", "N"]) == "S"
@@ -97,7 +211,6 @@ def main():
                     if desconto_possivel > 0:
                         console.print(f"[bold yellow]Você possui até {desconto_possivel}% de desconto nesta compra![/]\n")
                     
-                    # Seleção de Vendedor
                     vendedores = db.listar_opcoes('vendedores')
                     tab_v = Table(show_header=False, border_style="blue")
                     for v in vendedores: tab_v.add_row(f"[{v[0]}]", v[1])
@@ -105,7 +218,6 @@ def main():
                     console.print(tab_v)
                     id_vend = int(Prompt.ask("ID do Vendedor"))
 
-                    # Carrinho
                     console.print("\n[bold]🛒 ADICIONE AO CARRINHO (ID 0 para finalizar)[/]")
                     carrinho = []
                     while True:
@@ -115,7 +227,6 @@ def main():
                         carrinho.append({'id_prod': id_p, 'qtd': qtd})
 
                     if carrinho:
-                        # Pagamento
                         pagamentos = db.listar_opcoes('formas_pagamento')
                         for fp in pagamentos: console.print(f"[{fp[0]}] {fp[1]}")
                         id_pag = int(Prompt.ask("Forma de Pagamento"))
@@ -129,7 +240,7 @@ def main():
                     else:
                         console.print("[yellow]Carrinho vazio. Compra cancelada.[/]")
 
-                elif op_cli == '3':
+                elif escolha_cli == 2:
                     id_c = Prompt.ask("Informe seu ID de cliente")
                     try:
                         pedidos = db.historico_pedidos_cliente(int(id_c))
@@ -149,46 +260,51 @@ def main():
                     except Exception as e:
                         console.print(f"[red]❌ Erro ao buscar histórico: {e}[/]")
 
-                elif op_cli == '0': break
+                input("\n[Pressione ENTER para voltar ao menu...]")
 
-        # Área do funcionário aqui ó
-        elif opcao_principal == '2':
+        elif escolha_main == 1:
             while True:
-                console.print("\n[bold orange1]─── ÁREA DO FUNCIONÁRIO ───[/]")
-                print("1. Gerenciar Produtos (CRUD)")
-                print("2. Alertas de Estoque Baixo (< 5 unidades)")
-                print("3. Relatório Mensal de Vendas por Vendedor")
-                print("4. Ver Clientes Cadastrados")
-                print("0. Voltar")
-                op_func = Prompt.ask("Escolha", choices=["1", "2", "3", "4", "0"])
+                opcoes_func = [
+                    "Gerenciar Produtos (CRUD)", 
+                    "Alertas de Estoque Baixo", 
+                    "Relatório Mensal de Vendas", 
+                    "Ver Clientes Cadastrados", 
+                    "Voltar"
+                ]
+                escolha_func = menu_interativo(opcoes_func, "ÁREA DO FUNCIONÁRIO")
 
-                if op_func == '1':
+                if escolha_func == 4: # Voltar
+                    break
+
+                limpar_tela()
+
+                if escolha_func == 0:
                     while True:
-                        console.print("\n[bold yellow]--- GERENCIAR PRODUTOS ---[/]")
-                        print("1. Listar todos")
-                        print("2. Exibir um produto")
-                        print("3. Pesquisar por nome")
-                        print("4. Inserir produto")
-                        print("5. Alterar produto")
-                        print("6. Remover produto")
-                        print("7. Relatório geral do estoque")
-                        print("0. Voltar")
-                        op_crud = Prompt.ask("Escolha", choices=["1","2","3","4","5","6","7","0"])
+                        opcoes_crud = [
+                            "Listar todos", "Exibir um produto", "Pesquisar por nome", 
+                            "Inserir produto", "Alterar produto", "Remover produto", 
+                            "Relatório geral do estoque", "Voltar"
+                        ]
+                        escolha_crud = menu_interativo(opcoes_crud, "GERENCIAR PRODUTOS")
+                        
+                        if escolha_crud == 7: # Voltar
+                            break
+                        
+                        limpar_tela()
 
-                        if op_crud == '1':
+                        if escolha_crud == 0:
                             produtos = db.listar_todos()
                             t_est = Table(title="📦 TODOS OS PRODUTOS")
                             t_est.add_column("ID"); t_est.add_column("Nome")
                             t_est.add_column("Categoria"); t_est.add_column("Qualidade"); t_est.add_column("Qtd", justify="right")
                             for p in produtos:
-                                # p = (id, nome, estoque, categoria, qualidade)
                                 t_est.add_row(str(p[0]), p[1], p[3], p[4], str(p[2]))
                             console.print(t_est)
 
-                        elif op_crud == '2':
-                            id_p = Prompt.ask("ID do produto")
+                        elif escolha_crud == 1:
                             try:
-                                p = db.exibir_um(int(id_p))
+                                id_p = int(Prompt.ask("ID do produto"))
+                                p = db.exibir_um(id_p)
                                 if p:
                                     detalhes = f"Nome: {p['nome']}\nCategoria: {p['categoria']}\nQualidade: {p['qualidade']}\nEstoque: {p['estoque']} un.\nPreço Unitário: [green]{p['valor_unitario']:.1f} G[/]"
                                     console.print(Panel(detalhes, title=f"Detalhes do ID {id_p}", border_style="cyan"))
@@ -197,7 +313,7 @@ def main():
                             except ValueError:
                                 console.print("[red]ID inválido.[/]")
 
-                        elif op_crud == '3':
+                        elif escolha_crud == 2:
                             nome_p = Prompt.ask("Nome contém")
                             resultados = db.pesquisar_por_nome(nome_p)
                             if resultados:
@@ -205,17 +321,17 @@ def main():
                             else:
                                 console.print("[yellow]Nenhum produto encontrado.[/]")
 
-                        elif op_crud == '4':
+                        elif escolha_crud == 3:
                             try:
                                 n = Prompt.ask("Nome do produto")
                                 q = int(Prompt.ask("Quantidade em estoque"))
                                 
                                 console.print("\n[bold]Categorias disponíveis:[/]")
-                                for c in db.listar_opcoes('categorias'): print(f"  [{c[0]}] {c[1]} (base: {c[2]} G)")
+                                for c in db.listar_opcoes('categorias'): console.print(f"  [{c[0]}] {c[1]} (base: {c[2]} G)")
                                 c_id = int(Prompt.ask("ID Categoria"))
                                 
                                 console.print("\n[bold]Qualidades disponíveis:[/]")
-                                for ql in db.listar_opcoes('qualidades'): print(f"  [{ql[0]}] {ql[1]} (x{ql[2]})")
+                                for ql in db.listar_opcoes('qualidades'): console.print(f"  [{ql[0]}] {ql[1]} (x{ql[2]})")
                                 q_id = int(Prompt.ask("ID Qualidade"))
                                 
                                 m = Prompt.ask("Fabricado em Mari-PB? (S/N)", choices=["S", "N"]) == 'S'
@@ -227,7 +343,7 @@ def main():
                             except ValueError:
                                 console.print("[red]Entrada inválida.[/]")
 
-                        elif op_crud == '5':
+                        elif escolha_crud == 4:
                             try:
                                 id_p = int(Prompt.ask("ID do produto a alterar"))
                                 n = Prompt.ask("Novo nome (Enter para manter)") or None
@@ -241,7 +357,7 @@ def main():
                             except ValueError:
                                 console.print("[red]Entrada inválida.[/]")
 
-                        elif op_crud == '6':
+                        elif escolha_crud == 5:
                             try:
                                 id_p = int(Prompt.ask("ID do produto a remover"))
                                 confirma = Prompt.ask(f"Tem certeza que quer remover o ID {id_p}? (S/N)", choices=["S", "N"])
@@ -255,23 +371,24 @@ def main():
                             except ValueError:
                                 console.print("[red]ID inválido.[/]")
 
-                        elif op_crud == '7':
+                        elif escolha_crud == 6:
                             tipos, total, valor, categorias = db.gerar_relatorio()
                             rel = f"Tipos de produto: {tipos}\nTotal de itens: {total} unidades\nValor do estoque: [green]{valor:.1f} G[/]\n\n[bold]--- Quantidade por Categoria ---[/]\n"
                             for c, q in categorias.items(): rel += f"  {c}: {q} un.\n"
-                            console.print(Panel(rel, title=" Relatório Geral do Estoque", border_style="cyan"))
+                            console.print(Panel(rel, title="📊 Relatório Geral do Estoque", border_style="cyan"))
 
-                        elif op_crud == '0': break
+                        input("\n[Pressione ENTER para voltar...]")
 
-                elif op_func == '2':
+                elif escolha_func == 1:
                     baixo = db.filtrar_estoque_baixo()
                     console.print("\n[bold red]  ALERTA DE ESTOQUE BAIXO (< 5 unidades):[/]")
                     if baixo:
                         for b in baixo: console.print(f"  ID {b[0]} — {b[1]} (Restam [red]{b[2]}[/] un.)")
                     else:
                         console.print("  [green]Tudo abastecido! Nenhum produto crítico.[/]")
+                    input("\n[Pressione ENTER para voltar ao menu...]")
 
-                elif op_func == '3': 
+                elif escolha_func == 2:
                     try:
                         mes = int(Prompt.ask("Mês (1-12)"))
                         ano = int(Prompt.ask("Ano (ex: 2026)"))
@@ -286,8 +403,9 @@ def main():
                             console.print("\n[yellow]  Nenhuma venda confirmada neste período.[/]")
                     except ValueError:
                         console.print("[red]Mês ou ano inválido.[/]")
+                    input("\n[Pressione ENTER para voltar ao menu...]")
 
-                elif op_func == '4':
+                elif escolha_func == 3:
                     clientes = db.listar_clientes()
                     t_cli = Table(title="👥 CLIENTES CADASTRADOS")
                     t_cli.add_column("ID")
@@ -301,13 +419,7 @@ def main():
                         tags_str = ", ".join(tags) if tags else "Nenhuma"
                         t_cli.add_row(str(c[0]), c[1], f"[dim]{tags_str}[/]")
                     console.print(t_cli)
-
-                elif op_func == '0': break
-
-        elif opcao_principal == '0':
-            db.fechar_conexao()
-            console.print("\n[bold #8B4513]Até amanhã, Pierre! 🌻[/]")
-            break
+                    input("\n[Pressione ENTER para voltar ao menu...]")
 
 if __name__ == "__main__":
     main()
