@@ -190,13 +190,38 @@ def resetar_banco():
                 JOIN formas_pagamento f ON v.id_forma_pagamento = f.id_forma_pagamento;
 
                 CREATE VIEW vw_relatorio_vendas_mensal AS
-                SELECT vd.nome AS vendedor, EXTRACT(MONTH FROM v.data_venda) AS mes, 
-                    EXTRACT(YEAR FROM v.data_venda) AS ano, COUNT(v.id_venda) AS total_vendas, 
-                    SUM(v.valor_liquido) AS total_arrecadado
+                WITH VendedorItens AS (
+                    SELECT 
+                        v.id_vendedor, 
+                        EXTRACT(MONTH FROM v.data_venda) AS mes, 
+                        EXTRACT(YEAR FROM v.data_venda) AS ano,
+                        p.nome,
+                        SUM(iv.quantidade) as total_item
+                    FROM vendas v
+                    JOIN itens_venda iv ON v.id_venda = iv.id_venda
+                    JOIN produtos p ON iv.id_produto = p.id_produto
+                    WHERE v.status_pagamento = 'Confirmado'
+                    GROUP BY v.id_vendedor, mes, ano, p.nome
+                ),
+                ResumoItens AS (
+                    SELECT id_vendedor, mes, ano, STRING_AGG(nome || ' (' || total_item::text || 'x)', ', ') as itens_vendidos
+                    FROM VendedorItens
+                    GROUP BY id_vendedor, mes, ano
+                )
+                SELECT 
+                    vd.nome AS vendedor, 
+                    EXTRACT(MONTH FROM v.data_venda) AS mes, 
+                    EXTRACT(YEAR FROM v.data_venda) AS ano, 
+                    COUNT(v.id_venda) AS total_vendas, 
+                    SUM(v.valor_liquido) AS total_arrecadado,
+                    COALESCE(ri.itens_vendidos, 'Nenhum item registrado') AS itens_vendidos
                 FROM vendas v
                 JOIN vendedores vd ON v.id_vendedor = vd.id_vendedor
+                LEFT JOIN ResumoItens ri ON vd.id_vendedor = ri.id_vendedor 
+                     AND EXTRACT(MONTH FROM v.data_venda) = ri.mes 
+                     AND EXTRACT(YEAR FROM v.data_venda) = ri.ano
                 WHERE v.status_pagamento = 'Confirmado'
-                GROUP BY vd.nome, mes, ano;
+                GROUP BY vd.nome, EXTRACT(MONTH FROM v.data_venda), EXTRACT(YEAR FROM v.data_venda), ri.itens_vendidos;
             ''')
 
             # Criação de Procedures 

@@ -166,7 +166,7 @@ class GerenciadorArmazem:
             condicoes.append("categoria ILIKE %s")
             valores.append(f'%{categoria}%')
 
-        # Filtra por origem 
+        # Filtra por origem (fabricado em Mari-PB ou não)
         if mari is not None:
             condicoes.append("fabricado_em_mari = %s")
             valores.append(mari)
@@ -194,7 +194,7 @@ class GerenciadorArmazem:
         self.conexao.commit()
         return id_cliente
 
-    # 10. Listar opções 
+    # 10. Listar opções de uma tabela auxiliar para popular menus de escolha
     def listar_opcoes(self, tabela):
         with self.conexao.cursor() as cursor:
             if tabela == 'vendedores':

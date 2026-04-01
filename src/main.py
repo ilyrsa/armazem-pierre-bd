@@ -20,7 +20,7 @@ console = Console()
 interface = InterfaceStardew()
 
 ESTILO_FUNDO = "on #f4b75e"
-COR_BORDA    = "#000000"
+COR_BORDA    = "#561703"
 COR_FONTE    = "bold #680024"
 
 # ─────────────────────────────── ARTE ──────────────────────────────────────
@@ -57,9 +57,11 @@ ARTE_DIREITA = r"""
      %%#%#%%###%%%@@@%%%%%%%%%%%%%%::%.%%%%#####%%%* 
      *%%##%%%%%@@@%%::%@%%%%%%%%%%@.%-:=%@@@@%#%###%%%
 
-                    ╦ ╦ ╦ ╦═╗ ╦ ╦  ╔═╗
-                    ║ ║ ║ ╠╦╝ ╚╦╝  ╚═╗
-                    ╩ ╚═╝ ╩╚═  ╩   ╚═╝
+     
+
+                 ╦ ╦ ╦ ╦═╗ ╦ ╦  ╔═╗
+                 ║ ║ ║ ╠╦╝ ╚╦╝  ╚═╗
+                 ╩ ╚═╝ ╩╚═  ╩   ╚═╝
                 
 """
 
@@ -123,6 +125,10 @@ def aviso(msg: str, tipo: str = "info"):
     }
     console.print(f"\n  [{estilos.get(tipo, COR_FONTE)}]{msg}[/]\n")
 
+def pausar_tela():
+    console.print(f"\n[bold {COR_BORDA}] Pressione ENTER para voltar...[/]")
+    input()
+
 # ─────────────────────────────── MENU ──────────────────────────────────────
 
 def gerar_layout() -> Layout:
@@ -160,7 +166,7 @@ def atualizar_tela(layout: Layout, opcoes: list, indice_selecionado: int, titulo
     texto_menu.append(f"\n  {titulo_menu} \n\n", style=f"bold {COR_BORDA}")
     for i, opcao in enumerate(opcoes):
         if i == indice_selecionado:
-            texto_menu.append(f"  ► {opcao}\n", style=f"bold {COR_BORDA}")
+            texto_menu.append(f"  ► {opcao}\n", style=f"bold #571605")
         else:
             texto_menu.append(f"    {opcao}\n", style=f"bold {COR_BORDA}")
     texto_menu.append("\n\nUse ↑ ↓ pra navegar e Enter pra selecionar", style=f"dim {COR_BORDA}")
@@ -276,6 +282,7 @@ def main():
                         interface.exibir_catalogo(produtos)
                     else:
                         aviso("Nenhum produto encontrado com esses filtros.", "alerta")
+                    pausar_tela()
 
                 # ── FAZER UMA COMPRA ──────────────────────────────────────────
                 elif escolha_cli == 1:
@@ -341,10 +348,14 @@ def main():
                         if sucesso:
                             interface.exibir_recibo_pixel(retorno[0], retorno[1], retorno[2])
                             console.print(f"  [dim {COR_BORDA}](Guarde seu ID de cliente [{id_cli}] para histórico!)[/]\n")
+                            pausar_tela()
+                            break # Sai da tela do cliente após comprar
                         else:
                             aviso(f"ERRO NA COMPRA: {retorno}", "erro")
+                            pausar_tela()
                     else:
                         aviso("Carrinho vazio. Compra cancelada.", "alerta")
+                        pausar_tela()
 
                 # ── MEU HISTÓRICO ─────────────────────────────────────────────
                 elif escolha_cli == 2:
@@ -370,8 +381,8 @@ def main():
                         aviso("ID inválido.", "erro")
                     except Exception as e:
                         aviso(f"Erro ao buscar histórico: {e}", "erro")
+                    pausar_tela()
 
-                input(f"\n Pressione ENTER para voltar ao menu...[/]")
 
         # ── ÁREA DO FUNCIONÁRIO ───────────────────────────────────────────────
         elif escolha_main == 1:
@@ -404,17 +415,22 @@ def main():
                         cabecalho_tela("Gerenciar Produtos")
 
                         if escolha_crud == 0:
-                            produtos = db.listar_todos()
+                            # AQUI: Ajustado para pegar todos do catálogo (inclui mari) usando o filtro limpo
+                            produtos = db.listar_catalogo_filtrado()
                             t_est = tabela_stardew(
                                 "Todos os Produtos",
                                 {"header": "ID",        "justify": "center"},
                                 {"header": "Nome"},
                                 {"header": "Categoria"},
-                                {"header": "Qualidade"},
-                                {"header": "Qtd",       "justify": "right"}
+                                {"header": "Preço"},
+                                {"header": "Qtd",       "justify": "right"},
+                                {"header": "Origem",    "justify": "center"}
                             )
                             for p in produtos:
-                                t_est.add_row(str(p[0]), p[1], p[3], p[4], str(p[2]))
+                                # A View retorna: (id_produto, nome, preco_venda, categoria, quantidade_estoque, fabricado_em_mari)
+                                id_p, nome, preco, cat, estoque, mari = p
+                                tag_mari = f"[bold {COR_FONTE}]Mari-PB[/]" if mari else f"[dim {COR_BORDA}]Importado[/]"
+                                t_est.add_row(str(id_p), nome, cat, f"{preco:.1f} G", str(estoque), tag_mari)
                             console.print(Align.center(t_est))
 
                         elif escolha_crud == 1:
@@ -527,7 +543,7 @@ def main():
                                 rel.append(f"    {c}: {q} un.\n",                            style=f"bold {COR_FONTE}")
                             console.print(painel("Relatório Geral do Estoque", rel))
 
-                        input(f"\n Pressione ENTER para voltar...[/]")
+                        pausar_tela()
 
                 # ── ALERTAS DE ESTOQUE BAIXO ──────────────────────────────────
                 elif escolha_func == 1:
@@ -545,7 +561,7 @@ def main():
                         console.print(Align.center(t_al))
                     else:
                         aviso("Tudo abastecido! Nenhum produto crítico. ✔", "ok")
-                    input(f"\n Pressione ENTER para voltar ao menu...[/]")
+                    pausar_tela()
 
                 # ── RELATÓRIO MENSAL ──────────────────────────────────────────
                 elif escolha_func == 2:
@@ -559,16 +575,18 @@ def main():
                                 f"Relatório de Vendas — {mes:02d}/{ano}",
                                 {"header": "Vendedor"},
                                 {"header": "Vendas",           "justify": "center"},
+                                {"header": "Itens Vendidos"}, 
                                 {"header": "Total Arrecadado", "justify": "right"}
                             )
-                            for r in relatorio:
-                                t_rel.add_row(r[0], f"{r[1]} venda(s)", f"{r[2]:.1f} G")
+                            for r in relatorio: 
+                                itens = str(r[3]) if len(r) > 3 else "Nenhum item registrado"
+                                t_rel.add_row(r[0], f"{r[1]} venda(s)", itens, f"{r[2]:.1f} G")
                             console.print(Align.center(t_rel))
                         else:
                             aviso("Nenhuma venda confirmada neste período.", "alerta")
                     except ValueError:
                         aviso("Mês ou ano inválido.", "erro")
-                    input(f"\n Pressione ENTER para voltar ao menu...[/]")
+                    pausar_tela()
 
                 # ── VER CLIENTES ──────────────────────────────────────────────
                 elif escolha_func == 3:
@@ -588,7 +606,7 @@ def main():
                         tags_str = ", ".join(tags) if tags else "Nenhuma"
                         t_cli.add_row(str(c[0]), c[1], f"[dim {COR_BORDA}]{tags_str}[/]")
                     console.print(Align.center(t_cli))
-                    input(f"\n Pressione ENTER para voltar ao menu...[/]")
+                    pausar_tela()
 
 if __name__ == "__main__":
     main()
