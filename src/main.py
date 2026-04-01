@@ -73,7 +73,7 @@ TITULO_ESQUERDA = r"""
 TITULO_LOGO = r"""
    ╔═╗╦═╗╔╦╗╔═╗╔═╗╔═╗╔╦╗  ╔╦╗╔═╗  ╦╦ ╦╦═╗╦ ╦
    ╠═╣╠╦╝║║║╠═╣╔ ╝║╣ ║║║   ║║║ ║  ║║ ║╠╦╝╚╦╝
-   ╩ ╩╩╚═╩ ╩╩ ╩╚═╝╚═╝╩ ╩  ╩ ╩╚═╝  ╩╚═╝╩╚═ ╩ 
+   ╩ ╩╩╚═╩ ╩╩ ╩╚═╝╚═╝╩ ╩  ═╩╝╚═╝  ╩╚═╝╩╚═ ╩ 
                       
 """
 
@@ -81,7 +81,8 @@ TITULO_LOGO = r"""
 
 def configurar_fundo_terminal():
     sys.stdout.write("\033]11;#f4b75e\007")
-    sys.stdout.write("\033[48;2;244;183;94m\033[2J\033[H")
+    sys.stdout.write("\033]10;#561703\007")
+    sys.stdout.write("\033[48;2;244;183;94m\033[38;2;86;23;3m\033[2J\033[H")
     sys.stdout.flush()
 
 def painel(titulo: str, conteudo, subtitulo: str = "") -> Panel:
@@ -139,12 +140,12 @@ def gerar_layout() -> Layout:
 def atualizar_tela(layout: Layout, opcoes: list, indice_selecionado: int, titulo_menu: str):
     estilo_caixa = ESTILO_FUNDO
 
-    texto_arte = Text(ARTE_DIREITA, style=COR_FONTE)
+    texto_arte = Text(ARTE_DIREITA, style="bold #680024")
     painel_arte = Panel(
-        Align.center(texto_arte, vertical="middle"),
-        border_style=COR_BORDA, box=box.HEAVY,
-        title=f"[{COR_FONTE}]* Você é nosso Cliente VIP! *[/]",
-        style=estilo_caixa
+        Align.center(texto_arte, vertical="middle"), 
+        border_style=COR_BORDA, box=box.HEAVY, 
+        title=f"[bold {COR_BORDA}]* Iury veio te atender! *[/]",
+        style=estilo_caixa 
     )
 
     texto_titulo = Text(TITULO_ESQUERDA, style=COR_FONTE)
