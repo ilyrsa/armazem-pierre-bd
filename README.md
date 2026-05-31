@@ -1,13 +1,14 @@
-# 🌻 Armazém do Pierre — Sistema de Vendas Stardew Valley
+# Armazém do Pierre — Sistema de Vendas
 
-**Projeto da disciplina de Banco de Dados I**  
-O presente projeto é um sistema completo de CRUD e vendas em console Python para gerenciar estoque e compras do armazém do Pierre, inspirado no jogo Stardew Valley.
+Projeto da disciplina de **Banco de Dados I**.
+
+Um sistema de CRUD e vendas em console para gerenciar o estoque e as compras do armazém do Pierre, com tema inspirado no jogo Stardew Valley. A interface é dividida entre área do cliente e área do funcionário, com lógica de descontos, histórico de pedidos e relatórios mensais.
 
 <div align="center">
 
-![Python](https://img.shields.io/badge/Python-3.x-blue?style=flat-square)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-green?style=flat-square)  
-![Docker](https://img.shields.io/badge/Docker-Compose-blue?style=flat-square)
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat-square&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)
 
 </div>
 
@@ -16,137 +17,127 @@ O presente projeto é um sistema completo de CRUD e vendas em console Python par
 ## Estrutura do Projeto
 
 ```
-banco-de-dados/
+armazem-pierre-bd/
 ├── src/
-│   ├── main.py                      # Interface terminal (menus cliente e funcionário)
-│   └── gerenciador.py               # Lógica SQL aqui
+│   ├── main.py           # Interface de menus (cliente e funcionário)
+│   ├── interface.py      # Componentes visuais de terminal (rich)
+│   └── gerenciador.py    # Toda a lógica de acesso ao banco de dados
 ├── db/
-│   ├── docker-compose.yml           # Configuração PostgreSQL (container)
-│   ├── setup_banco.py               # DDL + seed (tabelas, views, dados iniciais)
-│   └── Fazenda Stardew session.sql  # SQL extra
+│   ├── docker-compose.yml        # Configuração do container PostgreSQL
+│   ├── setup_banco.py            # DDL + seed (cria e popula o banco do zero)
+│   └── Fazenda Stardew session.sql
 ├── docs/
-├── requirements.txt                 # Dependências Python
-├── .gitignore
+│   └── diagrama.pdf      # Diagrama entidade-relacionamento do projeto
+├── .env                  # Credenciais do banco (não versionado)
+├── requirements.txt      # Dependências Python
 └── README.md
 ```
 
 ---
 
-## Setup Completo
+## Primeira Vez: Setup Completo
 
 ### Pré-requisitos
-- **Python 3.7+**
-- **Docker** ([instale aqui](https://docs.docker.com/get-docker/))
-- **pip** (gerenciador de pacotes Python)
 
-### Passo 1: Clonar o Repositório
+- [Python 3.10+](https://www.python.org/downloads/)
+- [Docker](https://docs.docker.com/get-docker/) (com Docker Compose)
+
+### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/ilyrsa/banco-de-dados.git
-cd banco-de-dados
+git clone https://github.com/ilyrsa/armazem-pierre-bd.git
+cd armazem-pierre-bd
 ```
 
-### Passo 2: Criar e Ativar o Ambiente Virtual
+### 2. Criar e ativar o ambiente virtual
 
-O venv isola as dependências do projeto (evita conflitos com outros projetos).
+O `venv` isola as dependências do projeto e evita conflitos com outros projetos Python.
 
-**Linux/macOS:**
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-**Windows:**
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
+Quando ativo, você verá `(venv)` no início do terminal.
 
-> Quando ativo, você verá `(venv)` no início do terminal
+### 3. Instalar as dependências
 
-### Passo 3: Instalar Dependências
+Com o venv ativado:
 
-Com o venv **ativado**:
 ```bash
 pip install -r requirements.txt
 ```
 
-Isso instala `psycopg2-binary` (driver Python ↔ PostgreSQL).
+Isso instala `psycopg2-binary` (driver Python/PostgreSQL), `python-dotenv` (leitura do `.env`) e `rich` (interface de terminal).
 
-### Passo 4: Iniciar o Banco de Dados (Docker)
+### 4. Configurar as variáveis de ambiente
 
-**Na primeira vez — cria o container:**
+Crie um arquivo `.env` na raiz do projeto com o seguinte conteúdo:
+
+```env
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_NAME=stardew
+DB_USER=postgres
+DB_PASS=1234
+```
+
+### 5. Subir o banco de dados (Docker)
+
+Na **primeira vez**, o comando abaixo cria o container PostgreSQL:
+
 ```bash
 cd db
 docker-compose up -d
 cd ..
 ```
 
-Isso cria um container chamado `postgres_fazenda` na porta `5432`.
+Isso sobe um container chamado `postgres_fazenda` na porta `5432`, com volume persistente `stardew_data`.
 
-**Das próximas vezes — só inicie o container:**
-```bash
-docker start postgres_fazenda
-```
+### 6. Criar e popular o banco
 
-**Para parar:**
-```bash
-docker stop postgres_fazenda
-```
-
-**Verificar status:**
-```bash
-docker ps
-```
-
-### Passo 5: Popular o Banco de Dados
-
-Com Docker rodando e venv ativo, execute na pasta raiz:
+Com o container rodando e o venv ativo, execute a partir da raiz do projeto:
 
 ```bash
 python db/setup_banco.py
 ```
 
 Saída esperada:
+
 ```
+Limpando e recriando o baú...
 Baú do Pierre resetado! Tabelas, Views e Procedures de Venda criadas com sucesso!
 ```
 
-🔄 **Este script reseta tudo!** Use-o sempre que quiser começar do zero.
+> Este script dropa e recria tudo do zero. Use sempre que quiser reiniciar o estado do banco.
 
-### Passo 6: Executar a Aplicação
+### 7. Rodar a aplicação
 
 ```bash
 python src/main.py
-```
-
-Você verá:
-```
-=== 🌻 BEM-VINDO(A) AO ARMAZÉM DO PIERRE (Stardew Valley) 🌻 ===
-
-=== MENU PRINCIPAL ===
-1. Área do Cliente (Navegar / Comprar / Histórico)
-2. Área do Funcionário (Armazém / Relatórios / Clientes)
-0. Sair
 ```
 
 ---
 
-## Checklist para Próximas Sessões
+## Próximas Sessões
 
-Toda vez que quiser usar o sistema, execute na pasta raiz:
+Nas sessões seguintes, basta retomar o container e ativar o ambiente:
 
 ```bash
-# 1. Inicie o Docker
+# 1. Iniciar o container do banco
 docker start postgres_fazenda
 
-# 2. Ative o venv
-source venv/bin/activate          # Linux/macOS
-# ou
-venv\Scripts\activate             # Windows
+# 2. Ativar o venv
+source venv/bin/activate
 
-# 3. Rode o programa
+# 3. Rodar o programa
 python src/main.py
+```
+
+Para encerrar o container ao final:
+
+```bash
+docker stop postgres_fazenda
 ```
 
 ---
@@ -157,68 +148,90 @@ python src/main.py
 
 | Funcionalidade | Descrição |
 |---|---|
-| **Ver Catálogo** | Listar todos os produtos com nome, preço, categoria e estoque |
-| **Filtrar** | Por nome, faixa de preço, categoria ou origem (Mari-PB) |
-| **Realizar Compra** | Fazer cadastro, montar carrinho, escolher vendedor e forma de pagamento |
-| **Descontos** | 10% por cada critério (Flamengo + One Piece + Sousa-PB = até 30%) |
-| **Histórico** | Consultar pedidos anteriores pelo ID de cliente |
+| Ver catálogo | Lista todos os produtos com nome, preço calculado, categoria e estoque |
+| Filtrar produtos | Por nome, faixa de preço, categoria ou origem (fabricado em Mari-PB) |
+| Realizar compra | Cadastro, montagem de carrinho, escolha de vendedor e forma de pagamento |
+| Descontos | 10% por critério: torcer pro Flamengo, assistir One Piece ou ser de Sousa-PB (até 30%) |
+| Histórico de pedidos | Consulta de compras anteriores pelo ID do cliente |
 
 ### Área do Funcionário
 
 | Funcionalidade | Descrição |
 |---|---|
-| **Gerenciar Produtos** | Inserir, alterar, remover, pesquisar, listar e exibir detalhes |
-| **Alerta Estoque Baixo** | Ver produtos com < 5 unidades em estoque |
-| **Relatório Mensal** | Vendas confirmadas por vendedor em qualquer mês/ano |
-| **Gerenciar Clientes** | Ver lista de clientes cadastrados e seus critérios de desconto |
+| Inserir produto | Cadastra novo item com categoria, qualidade e origem |
+| Alterar produto | Atualiza nome e/ou quantidade de estoque |
+| Remover produto | Remove um produto pelo ID |
+| Pesquisar produto | Busca por trecho do nome |
+| Listar produtos | Exibe todos os produtos com categoria e qualidade |
+| Detalhes de um produto | Preço final calculado, estoque e atributos |
+| Alerta de estoque baixo | Lista produtos com menos de 5 unidades em estoque |
+| Relatório mensal | Vendas confirmadas por vendedor em qualquer mês/ano |
+| Gerenciar clientes | Lista de clientes cadastrados com seus critérios de desconto |
 
 ---
 
-## Formas de Pagamento (Inspiradas em Stardew Valley)
+## Banco de Dados
 
-| Forma | Descrição |
-|-------|-----------|
-| **Ouros (G)** | Moeda universal de Pelicano |
-| **Fichas do Cassino Qi** | Moeda do salão do Sr. Qi |
-| **Escambo de Recursos** | Troca direta por itens da fazenda |
-| **Bagas da Floresta** | Coleta sazonal vira moeda |
-| **Cristais de Iridium** | Mineral raro — crédito premium |
+### Tabelas
 
----
+| Tabela | Descrição |
+|---|---|
+| `categorias` | Tipos de produto (Semente, Cultivo, Coleta, Peixe…) com valor base |
+| `qualidades` | Raridade do produto (Normal, Prata, Ouro, Irídio) com multiplicador de preço |
+| `produtos` | Itens do armazém: nome, estoque, categoria, qualidade e origem |
+| `clientes` | Cadastro com os três critérios de desconto |
+| `vendedores` | Funcionários responsáveis pelas vendas |
+| `formas_pagamento` | Métodos de pagamento disponíveis |
+| `vendas` | Transações: data, cliente, vendedor, pagamento e valores |
+| `itens_venda` | Relação produto ↔ venda (quantidade, preço unitário, subtotal) |
 
-## Estrutura do Banco de Dados
+### Views
 
-**Tabelas principais:**
-- `produtos` — Item do armazém (nome, estoque, categoria, qualidade, origem)
-- `categorias` — Tipo de produto (Semente, Cultivo, Coleta, Peixe)
-- `qualidades` — Raridade (Normal, Prata, Ouro, Iridium)
-- `clientes` — Cadastro de clientes com os critérios de desconto
-- `vendedores` — Funcionários da loja
-- `vendas` — Transações (data, vendedor, cliente, forma de pagamento, valores)
-- `itens_venda` — Produtos em cada venda (relação muitos-para-muitos)
-- `formas_pagamento` — Métodos de pagamento disponíveis
+| View | Descrição |
+|---|---|
+| `vw_produtos_detalhados` | Produtos com preço final calculado (`valor_base × multiplicador`) |
+| `vw_historico_cliente` | Histórico de compras por cliente com forma de pagamento |
+| `vw_relatorio_vendas_mensal` | Vendas mensais agrupadas por vendedor com itens vendidos |
 
-**Views:**
-- `vw_produtos_detalhados` — Produtos com preço final calculado
-- `vw_historico_cliente` — Histórico de compras por cliente
-- `vw_relatorio_vendas_mensal` — Vendas mensais por vendedor
+### Stored Procedures
+
+| Procedure | Descrição |
+|---|---|
+| `sp_adicionar_item_venda` | Valida estoque, insere o item na venda e atualiza o valor bruto |
+| `sp_finalizar_venda` | Calcula e aplica o desconto, atualiza o valor líquido e confirma a venda |
+
+### Como o preço é calculado
+
+```
+preco_venda = categoria.valor_base × qualidade.multiplicador
+```
+
+Exemplo: Couve (Cultivo, qualidade Ouro) → `80.0 × 1.50 = 120.0 G`
 
 ---
 
 ## Configuração do Banco
 
-**Credenciais padrão** (`setup_banco.py`):
-- **Host:** localhost
-- **Database:** stardew
-- **User:** lari
-- **Password:** 1234
-- **Port:** 5432
+As credenciais são lidas do arquivo `.env` na raiz do projeto. Os valores padrão são:
 
-> Para usar credenciais diferentes, edite `db/setup_banco.py` e `src/gerenciador.py`
+| Variável | Valor padrão |
+|---|---|
+| `DB_HOST` | `127.0.0.1` |
+| `DB_PORT` | `5432` |
+| `DB_NAME` | `stardew` |
+| `DB_USER` | `postgres` |
+| `DB_PASS` | `1234` |
+
+Para usar credenciais diferentes, basta editar o `.env`. Os scripts `db/setup_banco.py` e `src/gerenciador.py` já leem tudo a partir dele.
 
 ---
 
-Desenvolvido por: [@ilyrsa](https://github.com/ilyrsa) · [@bruvaloes](https://github.com/bruvaloes)
+## Autoras
 
-## 📝 Licença
-Projeto acadêmico (2026)
+Desenvolvido por [@ilyrsa](https://github.com/ilyrsa) e [@bruvaloes](https://github.com/bruvaloes).
+
+---
+
+## Licença
+
+Projeto acadêmico — Banco de Dados I (2026).
