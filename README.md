@@ -28,7 +28,6 @@ armazem-pierre-bd/
 │   └── Fazenda Stardew session.sql
 ├── docs/
 │   └── diagrama.pdf      # Diagrama entidade-relacionamento do projeto
-├── .env                  # Credenciais do banco (não versionado)
 ├── requirements.txt      # Dependências Python
 └── README.md
 ```
