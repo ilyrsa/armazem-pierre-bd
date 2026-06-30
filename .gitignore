@@ -2,13 +2,13 @@
 *.db
 db/banco.db
 
-# Ignorar ambientes virtuais Python (qualquer variação de nome)
+# Ignorar ambientes virtuais Python 
 venv/
 .venv/
 env/
 .env/
 
-# Ignorar cache do Python (o typo original era _pycache_ em vez de __pycache__)
+# Ignorar cache do Python
 __pycache__/
 *.pyc
 *.pyo
